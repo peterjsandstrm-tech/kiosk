@@ -4,6 +4,12 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.1.2 — 2026-09-26
+
+### Changed
+- Minutes until departure are much larger (1.6rem, bold) so they can be read from a
+  distance; "ca" and "min" are shown smaller next to the number.
+
 ## 1.1.1 — 2026-09-26
 
 ### Changed

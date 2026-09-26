@@ -313,11 +313,17 @@
     flex: 1;
     font-size: 0.95rem;
   }
+  /* Minuterna till avgång är det viktigaste på raden: stor, fet siffra;
+     "ca" och "min" mindre så att siffran sticker ut. */
   .bus-time {
-    font-weight: 600;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     color: var(--accent);
   }
+  .bus-time-small { font-size: 0.55em; font-weight: 600; }
   .bus-time.now { color: #7CFC93; }
   .bus-time.past { color: var(--muted); font-weight: 500; font-size: 0.85rem; }
   .bus-item.departed { opacity: 0.55; }
@@ -513,7 +519,7 @@
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.1.2';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1091,8 +1097,7 @@ function formatDeparture(dep) {
     if (diffMin >= -1) return { text: 'Nu', now: true, past: false };
     return { text: `Avgick ${Math.abs(diffMin)} min sedan`, now: false, past: true };
   }
-  if (diffMin === 1) return { text: '1 min', now: false, past: false };
-  return { text: `${diffMin} min`, now: false, past: false };
+  return { text: `${diffMin}<span class="bus-time-small"> min</span>`, now: false, past: false };
 }
 
 const DEPARTURE_MODES = ['BUS', 'TRAM', 'TRAIN', 'METRO'];
@@ -1160,7 +1165,7 @@ function renderDepartures() {
       // Om fordonet ännu inte spåras live (EXPECTED/NOTEXPECTED) bygger tiden
       // på tidtabellen snarare än realtidsposition, så vi flaggar det som "ca".
       const isTimetableBased = journeyState === 'EXPECTED' || journeyState === 'NOTEXPECTED';
-      const uncertainPrefix = (isTimetableBased && !isNow && !past) ? 'ca ' : '';
+      const uncertainPrefix = (isTimetableBased && !isNow && !past) ? '<span class="bus-time-small">ca </span>' : '';
 
       return `
         <li class="bus-item ${past ? 'departed' : ''}">
