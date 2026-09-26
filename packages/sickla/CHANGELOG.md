@@ -1,0 +1,47 @@
+# Changelog — Sickla
+
+All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH`:
+MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
+Each release is tagged `sickla-v<version>` in git.
+
+## 1.1.0 — 2026-09-26
+
+### Added
+- Tapping the Sickla strandbad card opens a detail panel with all of this year's
+  bathing-water samples: assessment, date, water temperature, E. coli and intestinal
+  enterococci (value and assessment), algal bloom and weather at sampling. The header
+  shows bathing season, bloom risk, the last four EU classifications, active
+  advisories and the limits for "Otjänligt". Closes on ✕, a tap outside, Escape,
+  or automatically after 2 minutes.
+- Sample date shown next to the bathing-water temperature, so an old sample is not
+  read as today's temperature.
+- Version number in the footer (`v1.1.0`).
+- Automatic reload: the page checks `version.json` every 10 minutes and reloads when
+  a new version has been published.
+
+### Changed
+- Quality badges in the bathing card are aligned in a grid.
+- Month written in lower case in the date ("Lördag 26 september").
+- Stop picker: the arrow sits directly after the selected stop name.
+- Departures title uses bus and tram icons instead of emoji.
+- Text from the bathing-water API in the detail panel is HTML-escaped.
+
+### Fixed
+- Departures no longer disappear on a single failed request (e.g. HTTP 429 or SL's
+  "Quota has been exceeded" reply). The last list stays on screen and keeps counting
+  down; retries back off from 30 s up to 5 minutes. A notice appears only after
+  3 minutes without a successful update.
+- HTTP error replies are no longer retried through the CORS proxy.
+
+## 1.0.0 — 2026-09-26
+
+First versioned release, assigned retroactively to commit `b09f431`.
+
+- Date and time.
+- SMHI weather warnings filtered to Sickla's coordinate.
+- SMHI weather: current conditions and forecast for 09, 13, 17 and 21.
+- Sickla strandbad bathing water: advisories, water temperature, latest two samples,
+  EU classification.
+- Next departures (bus, tram, train, metro) with a stop picker for 14 stops around
+  Sickla, realtime indicator and deviations.
+- Footer and messages say "buss/tåg" instead of only buses.
