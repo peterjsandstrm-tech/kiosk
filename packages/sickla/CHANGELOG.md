@@ -4,6 +4,15 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.2.0 — 2026-09-26
+
+### Added
+- VMA (Viktigt meddelande till allmänheten) shown in a red banner at the top of the
+  page. Source: Krisinformation.se API (`/v3/vmas`, Myndigheten för civilt försvar),
+  fetched every 60 seconds, no key. Alerts covering Sickla are labelled
+  "Gäller Sickla" and listed first; alerts elsewhere in Stockholm County are shown
+  too, labelled "Stockholms län". Test messages are never shown.
+
 ## 1.1.2 — 2026-09-26
 
 ### Changed

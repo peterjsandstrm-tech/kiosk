@@ -368,6 +368,46 @@
   .warning-banner.level-orange { background: rgba(255, 149, 0, 0.2); border-color: rgba(255, 149, 0, 0.55); }
   .warning-banner.level-red { background: rgba(255, 59, 48, 0.22); border-color: rgba(255, 59, 48, 0.6); }
   .warning-banner.level-message { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); }
+  /* ---------- VMA (Viktigt meddelande till allmänheten) ---------- */
+  .vma-banner {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: rgba(220, 30, 30, 0.85);
+    border: 2px solid #ff6b60;
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.25);
+  }
+  .vma-banner.visible { display: flex; }
+  .vma-item + .vma-item { border-top: 1px solid rgba(255,255,255,0.35); padding-top: 12px; }
+  .vma-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .vma-headline {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .vma-area {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .vma-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-top: 8px;
+    white-space: pre-line;
+  }
+  .vma-time {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    margin-top: 6px;
+  }
   /* ---------- Badvatten: detaljruta med årets alla prov ---------- */
   .wrap { position: relative; }
   .bathing-overlay {
@@ -463,6 +503,8 @@
 <div class="wrap">
   <h1>Sickla · Nacka</h1>
 
+  <div class="vma-banner" id="vmaBanner" role="alert"></div>
+
   <div class="card datetime-card">
     <span class="clock-date" id="clockDate">—</span>
     <span class="clock-time" id="clockTime">--:--:--</span>
@@ -511,7 +553,7 @@
     <div class="bo-list" id="bathingOverlayList"></div>
   </div>
 
-  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten</div>
+  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se</div>
   <div class="footer-note">Skapad av Sandstream · <span id="appVersion"></span></div>
 </div>
 
@@ -519,7 +561,7 @@
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.1.2';
+const APP_VERSION = '1.2.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -656,6 +698,101 @@ async function loadWarnings() {
 }
 loadWarnings();
 setInterval(loadWarnings, 15 * 60 * 1000); // varningar uppdateras inte superfrekvent, var 15:e minut räcker
+
+// ---------- VMA (Viktigt meddelande till allmänheten) ----------
+// Källa: Krisinformation.se (Myndigheten för civilt försvar), öppet API utan nyckel.
+// Visar aktiva VMA som gäller Sickla eller någon annan del av Stockholms län,
+// eftersom man kan vara på väg någon annanstans i länet. Testmeddelanden visas aldrig.
+const VMA_URL = 'https://api.krisinformation.se/v3/vmas';
+const VMA_REFRESH_MS = 60 * 1000;
+
+// Förenklad kontur av Stockholms län [lon, lat] (Douglas–Peucker, ca 1 km),
+// härledd från länets polygon i Krisinformations test-VMA. Kustlinjen är grov,
+// så ett område räknas också till länet om namnet nämner Stockholm.
+const STOCKHOLM_COUNTY_OUTLINE = [[[17.24,59.242],[17.285,59.268],[17.302,59.252],[17.362,59.257],[17.418,59.242],[17.377,59.286],[17.366,59.325],[17.384,59.328],[17.566,59.268],[17.629,59.208],[17.604,59.281],[17.684,59.285],[17.737,59.256],[17.841,59.263],[17.872,59.237],[17.881,59.29],[18.064,59.324],[17.988,59.347],[17.975,59.322],[17.948,59.319],[17.831,59.37],[17.777,59.403],[17.776,59.424],[17.807,59.467],[17.772,59.483],[17.739,59.436],[17.7,59.448],[17.688,59.481],[17.647,59.496],[17.626,59.497],[17.612,59.488],[17.617,59.469],[17.601,59.469],[17.589,59.503],[17.568,59.488],[17.527,59.515],[17.572,59.549],[17.572,59.576],[17.534,59.595],[17.531,59.613],[17.591,59.65],[17.582,59.656],[17.64,59.676],[17.635,59.695],[17.755,59.665],[17.791,59.685],[17.824,59.68],[18.037,59.737],[18.089,59.736],[18.14,59.814],[18.297,59.833],[18.374,59.869],[18.403,59.996],[18.442,60.004],[18.382,60.045],[18.462,60.057],[18.511,60.155],[18.676,60.131],[18.708,60.163],[18.721,60.213],[18.799,60.172],[18.781,60.108],[18.82,60.092],[18.86,60.003],[18.929,59.937],[19.084,59.871],[19.041,59.819],[18.97,59.821],[18.97,59.777],[19.068,59.76],[19.075,59.715],[19.015,59.697],[18.859,59.706],[18.741,59.676],[18.724,59.622],[18.667,59.577],[18.518,59.53],[18.39,59.458],[18.285,59.469],[18.301,59.444],[18.235,59.44],[18.285,59.414],[18.269,59.406],[18.294,59.393],[18.163,59.397],[18.175,59.426],[18.203,59.424],[18.197,59.443],[18.161,59.436],[18.154,59.451],[18.11,59.436],[18.088,59.393],[18.06,59.378],[18.137,59.326],[18.07,59.333],[18.066,59.322],[18.12,59.315],[18.205,59.331],[18.213,59.297],[18.272,59.298],[18.338,59.273],[18.254,59.268],[18.387,59.222],[18.404,59.205],[18.365,59.181],[18.449,59.169],[18.412,59.139],[18.284,59.12],[18.269,59.107],[18.315,59.108],[18.301,59.093],[18.202,59.069],[18.228,59.105],[18.258,59.114],[18.225,59.121],[18.189,59.093],[18.042,59.053],[18.026,59.03],[18.0,59.043],[18.007,59.003],[17.984,59.013],[17.976,59.002],[17.956,58.968],[17.952,58.913],[17.907,58.893],[17.848,58.811],[17.785,58.802],[17.822,58.851],[17.747,58.924],[17.757,58.996],[17.737,59.05],[17.778,59.097],[17.774,59.121],[17.732,59.102],[17.736,59.071],[17.691,59.068],[17.692,59.143],[17.674,59.168],[17.657,59.167],[17.68,59.117],[17.618,59.088],[17.633,59.068],[17.615,59.052],[17.615,59.012],[17.633,59.002],[17.657,59.052],[17.686,59.052],[17.695,58.959],[17.676,58.935],[17.637,58.943],[17.619,58.905],[17.6,58.948],[17.525,58.968],[17.521,58.992],[17.364,58.992],[17.289,59.05],[17.304,59.142],[17.254,59.19],[17.24,59.242]],[[18.359,59.359],[18.447,59.34],[18.412,59.298],[18.421,59.292],[18.547,59.267],[18.541,59.284],[18.685,59.292],[18.639,59.257],[18.524,59.218],[18.482,59.225],[18.378,59.285],[18.333,59.291],[18.371,59.33],[18.305,59.337],[18.28,59.309],[18.223,59.309],[18.227,59.344],[18.264,59.361],[18.359,59.359]],[[18.463,59.398],[18.436,59.416],[18.499,59.417],[18.519,59.39],[18.615,59.371],[18.612,59.355],[18.549,59.353],[18.627,59.336],[18.633,59.318],[18.612,59.299],[18.518,59.29],[18.456,59.306],[18.469,59.34],[18.456,59.363],[18.463,59.398]],[[17.787,59.326],[17.761,59.307],[17.697,59.328],[17.654,59.364],[17.6,59.45],[17.73,59.41],[17.702,59.399],[17.762,59.38],[17.787,59.326]],[[17.613,59.363],[17.536,59.407],[17.548,59.424],[17.593,59.429],[17.654,59.324],[17.76,59.295],[17.81,59.297],[17.843,59.278],[17.727,59.279],[17.632,59.311],[17.613,59.363]],[[18.579,59.456],[18.545,59.429],[18.52,59.493],[18.559,59.485],[18.576,59.5],[18.552,59.507],[18.59,59.539],[18.672,59.559],[18.663,59.55],[18.688,59.531],[18.599,59.494],[18.598,59.46],[18.579,59.456]],[[18.406,59.01],[18.345,59.022],[18.341,59.033],[18.365,59.047],[18.345,59.054],[18.371,59.081],[18.467,59.122],[18.485,59.101],[18.426,59.055],[18.406,59.01]],[[18.972,59.641],[18.97,59.621],[18.914,59.619],[18.905,59.595],[18.858,59.599],[18.772,59.569],[18.754,59.577],[18.856,59.639],[18.917,59.655],[18.972,59.641]],[[18.221,58.915],[18.147,58.924],[18.353,58.983],[18.282,58.945],[18.307,58.933],[18.221,58.915]],[[18.073,58.971],[18.052,58.97],[18.056,58.989],[18.09,59.027],[18.206,59.031],[18.136,58.999],[18.15,58.978],[18.121,58.972],[18.1,58.988],[18.073,58.971]],[[18.721,59.364],[18.724,59.319],[18.672,59.303],[18.665,59.348],[18.637,59.372],[18.721,59.364]],[[17.488,59.378],[17.468,59.391],[17.471,59.416],[17.505,59.419],[17.543,59.379],[17.54,59.347],[17.503,59.35],[17.488,59.378]],[[18.106,59.39],[18.244,59.369],[18.166,59.344],[18.144,59.348],[18.106,59.39]],[[17.89,59.334],[17.861,59.303],[17.806,59.339],[17.842,59.355],[17.89,59.334]],[[18.851,59.407],[18.858,59.436],[18.922,59.441],[18.86,59.393],[18.836,59.391],[18.851,59.407]]];
+
+function pointInStockholmCounty(lon, lat) {
+  return STOCKHOLM_COUNTY_OUTLINE.some(ring => rayCastRing(lon, lat, ring));
+}
+
+function geometryPoints(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === 'Polygon') return geometry.coordinates.flat();
+  if (geometry.type === 'MultiPolygon') return geometry.coordinates.flat(2);
+  if (geometry.type === 'Point') return [geometry.coordinates];
+  return [];
+}
+
+function parseAreaGeometry(area) {
+  let info = area && area.GeometryInformation;
+  if (typeof info === 'string') {
+    try { info = JSON.parse(info); } catch (e) { info = null; }
+  }
+  return {
+    geometry: info && info.Geometry,
+    pole: info && info.PoleOfInInaccessibility
+  };
+}
+
+// 'sickla' om området täcker Sickla, 'county' om det ligger i Stockholms län, annars null
+function vmaAreaRelevance(area) {
+  const { geometry, pole } = parseAreaGeometry(area);
+  if (pointInGeometry(SICKLA_LON, SICKLA_LAT, geometry)) return 'sickla';
+  if (/stockholm/i.test((area && area.Description) || '')) return 'county';
+  const points = geometryPoints(geometry).concat(geometryPoints(pole));
+  if (points.some(([lon, lat]) => pointInStockholmCounty(lon, lat))) return 'county';
+  return null;
+}
+
+async function loadVma() {
+  const banner = document.getElementById('vmaBanner');
+  try {
+    const data = await fetchJSON(VMA_URL);
+    if (!Array.isArray(data)) throw new Error('Oväntat svar');
+
+    const items = [];
+    for (const vma of data) {
+      if (vma.IsTest) continue;
+      const areas = vma.Area || [];
+      const relevances = areas.map(vmaAreaRelevance);
+      const affectsSickla = relevances.includes('sickla');
+      if (!affectsSickla && !relevances.includes('county')) continue;
+      items.push({ vma, affectsSickla, areaNames: areas.map(a => a.Description).filter(Boolean) });
+    }
+
+    if (items.length === 0) {
+      banner.className = 'vma-banner';
+      banner.innerHTML = '';
+      return;
+    }
+
+    // VMA som gäller Sickla först, därefter senast publicerade
+    items.sort((a, b) => (b.affectsSickla - a.affectsSickla) ||
+      (new Date(b.vma.Published) - new Date(a.vma.Published)));
+
+    banner.className = 'vma-banner visible';
+    banner.innerHTML = items.map(({ vma, affectsSickla, areaNames }) => {
+      const label = affectsSickla ? '📢 VMA · Gäller Sickla' : '📢 VMA · Stockholms län';
+      const areaText = areaNames.length ? `Område: ${areaNames.join(', ')}` : '';
+      const text = vma.Preamble || vma.PushMessage || vma.BodyText || '';
+      const published = vma.Published
+        ? new Date(vma.Published).toLocaleString('sv-SE', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+        : '';
+      return `
+        <div class="vma-item">
+          <div class="vma-label">${escapeHtml(label)}</div>
+          <div class="vma-headline">${escapeHtml(vma.Headline || 'Viktigt meddelande till allmänheten')}</div>
+          ${areaText ? `<div class="vma-area">${escapeHtml(areaText)}</div>` : ''}
+          ${text ? `<div class="vma-text">${escapeHtml(text.trim())}</div>` : ''}
+          ${published ? `<div class="vma-time">Utfärdat ${escapeHtml(published)} · ${escapeHtml(vma.SenderName || 'Krisinformation.se')}</div>` : ''}
+        </div>`;
+    }).join('');
+  } catch (e) {
+    // Vid fel behålls det som redan visas; nästa försök om 60 sekunder.
+  }
+}
+loadVma();
+setInterval(loadVma, VMA_REFRESH_MS);
 
 // ---------- Klocka ----------
 function updateClock() {
