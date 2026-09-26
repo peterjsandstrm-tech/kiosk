@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.3.0 — 2026-09-26
+
+### Added
+- Precipitation radar for the next 2 hours in the weather card, shown only when rain
+  or snow is expected in Sickla. Source: MET Norway nowcast 2.0 (radar-based,
+  5-minute steps, no key), fetched every 5 minutes. A line of text says what is
+  coming and when (e.g. "Lätt regn om ca 25 min", "Måttligt regn nu, upphör om ca
+  40 min") and a small bar chart shows the intensity over the two hours. Rain,
+  sleet or snow is inferred from the air temperature.
+
 ## 1.2.0 — 2026-09-26
 
 ### Added
