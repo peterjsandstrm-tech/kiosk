@@ -830,7 +830,7 @@ async function loadBuses() {
         </li>`;
     }).join('');
   } catch (e) {
-    list.innerHTML = `<li class="status-msg">Kunde inte hämta bussavgångar (${e.message}).</li>`;
+    list.innerHTML = `<li class="status-msg">Kunde inte hämta buss- och tågavgångar (${e.message}).</li>`;
   }
 }
 populateStopSelect();
