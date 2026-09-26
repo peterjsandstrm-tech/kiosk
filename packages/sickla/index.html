@@ -391,7 +391,7 @@
     </ul>
   </div>
 
-  <div class="footer-note">Väder: SMHI Open Data · Bussar: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten</div>
+  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten</div>
   <div class="footer-note">Skapad av Sandstream</div>
 </div>
 
@@ -796,7 +796,7 @@ async function loadBuses() {
       .sort((a, b) => new Date(a.expected) - new Date(b.expected));
 
     if (buses.length === 0) {
-      list.innerHTML = '<li class="status-msg">Inga bussavgångar inom den senaste 10 min eller kommande timmen.</li>';
+      list.innerHTML = '<li class="status-msg">Inga buss- eller tågavgångar inom de senaste 10 min eller kommande timmen.</li>';
       return;
     }
 
