@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.1.1 — 2026-09-26
+
+### Changed
+- The bathing-water detail panel is taller: it now reaches over most of the
+  departures card (85 % of its height, at least 240 px) instead of about half.
+- Departures title reads "Nästa avgång" instead of "Nästa buss/tåg".
+- Hidden pages (e.g. background browser tabs) pause fetching departures and resume
+  immediately when shown again, to spare SL's request quota. Visible pages, such as
+  the tablet, still fetch every 30 seconds.
+
 ## 1.1.0 — 2026-09-26
 
 ### Added

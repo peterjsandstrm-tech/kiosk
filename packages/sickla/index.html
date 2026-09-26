@@ -488,7 +488,7 @@
     <div class="card-title">
       <svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
       <svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-6.01-3.49l.76-1.51H17V2H7v1.5h4.75l-.76 1.52C7.86 5.11 5 5.73 5 8.5v8.44c0 1.45 1.19 2.66 2.59 2.97L6 21.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 20h-.08c1.69 0 2.58-1.37 2.58-3.06zM12 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5-4.5H7V9h10v5z"/></svg>
-      Nästa buss/tåg,
+      Nästa avgång,
       <select class="stop-select" id="stopSelect"></select>
     </div>
     <ul class="bus-list" id="busList">
@@ -513,7 +513,7 @@
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -931,8 +931,8 @@ function positionBathingOverlay() {
   const overlay = document.getElementById('bathingOverlay');
   const topRow = document.querySelector('.top-row');
   const busCard = document.getElementById('busCard');
-  // Från väderrutans överkant ner till ungefär halva avgångsrutan
-  const extra = Math.max(160, Math.round(busCard.offsetHeight * 0.5));
+  // Från väderrutans överkant ner över största delen av avgångsrutan
+  const extra = Math.max(240, Math.round(busCard.offsetHeight * 0.85));
   overlay.style.top = `${topRow.offsetTop}px`;
   overlay.style.height = `${busCard.offsetTop - topRow.offsetTop + Math.min(extra, busCard.offsetHeight)}px`;
 }
@@ -1182,7 +1182,24 @@ function scheduleDeparturesFetch(delayMs) {
   departuresTimer = setTimeout(loadBuses, delayMs);
 }
 
+// Dolda sidor (t.ex. bakgrundsflikar på datorn) hämtar inte avgångar, så de
+// inte drar från SL:s kvot. Hämtningen återupptas direkt när sidan syns igen.
+// Plattan i hallen syns alltid och hämtar därför var 30:e sekund som vanligt.
+let departuresPaused = false;
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && departuresPaused) {
+    departuresPaused = false;
+    loadBuses();
+  }
+});
+
 async function loadBuses() {
+  if (document.hidden) {
+    clearTimeout(departuresTimer);
+    departuresPaused = true;
+    return;
+  }
   const stopId = selectedStopId;
   try {
     const data = await fetchJSON(`https://transport.integration.sl.se/v1/sites/${stopId}/departures`);
