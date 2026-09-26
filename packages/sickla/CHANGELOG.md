@@ -4,6 +4,18 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.4.0 — 2026-09-26
+
+### Added
+- The departures list can be filtered by tapping: the bus or tram icon in the title
+  shows only buses or only trains/trams (TRAM, TRAIN, METRO); a line number shows only
+  that line; a destination (e.g. "Slussen") shows only departures to it. Tapping the
+  same thing again, or the "Visar bara …" chip above the list, removes the filter.
+  One filter is active at a time, and it is remembered per stop across reloads.
+
+### Changed
+- Line numbers and destinations in the departures list are now HTML-escaped.
+
 ## 1.3.0 — 2026-09-26
 
 ### Added

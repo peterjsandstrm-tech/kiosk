@@ -1,6 +1,6 @@
 # Sickla
 
-Kiosk info board for Sickla — wall-mounted tablet display showing VMA public alerts (Stockholm County), date/time, weather, precipitation radar for the next 2 hours, weather warnings, bathing-water quality at Sickla strandbad, and next departures from the Sickla stop.
+Kiosk info board for Sickla — wall-mounted tablet display showing VMA public alerts (Stockholm County), date/time, weather, precipitation radar for the next 2 hours, weather warnings, bathing-water quality at Sickla strandbad, and next departures from the Sickla stop (filterable by mode, line or destination with a tap).
 
 Live: https://peterjsandstrm-tech.github.io/kiosk/packages/sickla/
 

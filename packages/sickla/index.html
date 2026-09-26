@@ -209,6 +209,47 @@
     fill: currentColor;
     flex-shrink: 0;
   }
+  /* Filtrering av avgångar: tryck på ikon, linje eller slutstation, tryck igen för att ta bort */
+  .mode-filter {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 4px;
+    margin: -4px 0;
+    color: inherit;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .mode-filter.active {
+    color: #1e2a44;
+    background: var(--accent);
+  }
+  .filter-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 10px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .filter-bar.visible { display: flex; }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  .bus-line, .bus-dest { cursor: pointer; }
+  .bus-line.active { outline: 2px solid #fff; outline-offset: 2px; }
+  .bus-dest.active { text-decoration: underline; text-underline-offset: 3px; }
   .stop-select option {
     color: #1e2a44;
     text-transform: none;
@@ -573,11 +614,12 @@
 
   <div class="card" id="busCard">
     <div class="card-title">
-      <svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
-      <svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-6.01-3.49l.76-1.51H17V2H7v1.5h4.75l-.76 1.52C7.86 5.11 5 5.73 5 8.5v8.44c0 1.45 1.19 2.66 2.59 2.97L6 21.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 20h-.08c1.69 0 2.58-1.37 2.58-3.06zM12 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5-4.5H7V9h10v5z"/></svg>
+      <button class="mode-filter" data-filter-type="mode" data-filter-value="bus" aria-label="Visa bara bussar"><svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg></button>
+      <button class="mode-filter" data-filter-type="mode" data-filter-value="rail" aria-label="Visa bara tåg och spårvagn"><svg class="mode-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-6.01-3.49l.76-1.51H17V2H7v1.5h4.75l-.76 1.52C7.86 5.11 5 5.73 5 8.5v8.44c0 1.45 1.19 2.66 2.59 2.97L6 21.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 20h-.08c1.69 0 2.58-1.37 2.58-3.06zM12 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5-4.5H7V9h10v5z"/></svg></button>
       Nästa avgång,
       <select class="stop-select" id="stopSelect"></select>
     </div>
+    <div class="filter-bar" id="filterBar">Visar bara <button class="filter-chip" id="filterChip" aria-label="Ta bort filter"></button></div>
     <ul class="bus-list" id="busList">
       <li class="status-msg">Hämtar avgångar…</li>
     </ul>
@@ -600,7 +642,7 @@
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1352,6 +1394,82 @@ function formatDeparture(dep) {
 
 const DEPARTURE_MODES = ['BUS', 'TRAM', 'TRAIN', 'METRO'];
 
+// ---------- Filtrering av avgångar ----------
+// Ett filter åt gången: trafikslag (tryck på buss- eller tågikonen i rubriken),
+// linje (tryck på linjenumret) eller slutstation (tryck på slutstationen).
+// Tryck på samma sak igen, eller på filterknappen, så visas allt igen.
+// Filtret sparas per hållplats så att det överlever omladdning vid ny version.
+const FILTER_STORAGE_PREFIX = 'kiosk-sickla-filter-';
+const RAIL_MODES = ['TRAM', 'TRAIN', 'METRO'];
+let departureFilter = null; // { type: 'mode' | 'line' | 'dest', value }
+
+function loadDepartureFilter(stopId) {
+  try {
+    const f = JSON.parse(localStorage.getItem(FILTER_STORAGE_PREFIX + stopId));
+    return f && ['mode', 'line', 'dest'].includes(f.type) && typeof f.value === 'string' ? f : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setDepartureFilter(filter) {
+  departureFilter = filter;
+  try {
+    if (filter) localStorage.setItem(FILTER_STORAGE_PREFIX + selectedStopId, JSON.stringify(filter));
+    else localStorage.removeItem(FILTER_STORAGE_PREFIX + selectedStopId);
+  } catch (e) { /* utan lagring gäller filtret bara tills sidan laddas om */ }
+  renderDepartures();
+}
+
+function toggleDepartureFilter(type, value) {
+  const same = departureFilter && departureFilter.type === type && departureFilter.value === value;
+  setDepartureFilter(same ? null : { type, value });
+}
+
+function departureLine(dep) {
+  return String(dep.line.designation || dep.line.id);
+}
+
+function departureDestination(dep) {
+  return dep.destination || dep.direction || '';
+}
+
+function matchesDepartureFilter(dep) {
+  if (!departureFilter) return true;
+  const { type, value } = departureFilter;
+  if (type === 'mode') {
+    return value === 'bus' ? dep.line.transport_mode === 'BUS' : RAIL_MODES.includes(dep.line.transport_mode);
+  }
+  if (type === 'line') return departureLine(dep) === value;
+  return departureDestination(dep) === value;
+}
+
+function departureFilterLabel() {
+  const { type, value } = departureFilter;
+  if (type === 'mode') return value === 'bus' ? 'bussar' : 'tåg och spårvagn';
+  if (type === 'line') return `linje ${value}`;
+  return `mot ${value}`;
+}
+
+function renderFilterBar() {
+  document.getElementById('filterBar').classList.toggle('visible', !!departureFilter);
+  document.getElementById('filterChip').innerHTML = departureFilter
+    ? `${escapeHtml(departureFilterLabel())} <span aria-hidden="true">✕</span>`
+    : '';
+  document.querySelectorAll('.mode-filter').forEach(btn => {
+    btn.classList.toggle('active', !!departureFilter && departureFilter.type === 'mode' && departureFilter.value === btn.dataset.filterValue);
+  });
+}
+
+document.getElementById('busCard').addEventListener('click', (e) => {
+  if (e.target.closest('#filterChip')) {
+    setDepartureFilter(null);
+    return;
+  }
+  const el = e.target.closest('[data-filter-type]');
+  if (el) toggleDepartureFilter(el.dataset.filterType, el.dataset.filterValue);
+});
+
 // Avgångarna hämtas var 30:e sekund men ritas om var 15:e sekund från senaste
 // lyckade svaret, så minuterna räknas ner även mellan hämtningarna. Ett enstaka
 // fel (t.ex. HTTP 429 "för många anrop" från SL) tar inte bort listan: den
@@ -1373,6 +1491,7 @@ function renderDepartures() {
   const list = document.getElementById('busList');
   const nowMs = Date.now();
   const failingLong = departuresFailingSince && nowMs - departuresFailingSince >= DEPARTURES_STALE_MS;
+  renderFilterBar();
 
   if (!departuresCache) {
     list.innerHTML = failingLong
@@ -1390,6 +1509,7 @@ function renderDepartures() {
       const t = new Date(d.expected).getTime();
       return t >= windowStartMs && t <= windowEndMs;
     })
+    .filter(matchesDepartureFilter)
     .sort((a, b) => new Date(a.expected) - new Date(b.expected));
 
   const staleHtml = failingLong
@@ -1397,7 +1517,9 @@ function renderDepartures() {
     : '';
 
   if (buses.length === 0) {
-    list.innerHTML = '<li class="status-msg">Inga buss- eller tågavgångar inom de senaste 10 min eller kommande timmen.</li>' + staleHtml;
+    list.innerHTML = (departureFilter
+      ? `<li class="status-msg">Inga avgångar (${escapeHtml(departureFilterLabel())}) inom de senaste 10 min eller kommande timmen. Tryck på filtret ovan för att visa alla.</li>`
+      : '<li class="status-msg">Inga buss- eller tågavgångar inom de senaste 10 min eller kommande timmen.</li>') + staleHtml;
     return;
   }
 
@@ -1417,14 +1539,19 @@ function renderDepartures() {
       const isTimetableBased = journeyState === 'EXPECTED' || journeyState === 'NOTEXPECTED';
       const uncertainPrefix = (isTimetableBased && !isNow && !past) ? '<span class="bus-time-small">ca </span>' : '';
 
+      const line = departureLine(dep);
+      const dest = departureDestination(dep);
+      const lineActive = departureFilter && departureFilter.type === 'line' ? ' active' : '';
+      const destActive = departureFilter && departureFilter.type === 'dest' ? ' active' : '';
+
       return `
         <li class="bus-item ${past ? 'departed' : ''}">
           <div class="bus-main-row">
             <span class="bus-line-wrap">
-              <span class="bus-line">${dep.line.designation || dep.line.id}</span>
+              <span class="bus-line${lineActive}" data-filter-type="line" data-filter-value="${escapeHtml(line)}">${escapeHtml(line)}</span>
               ${dotHtml}
             </span>
-            <span class="bus-dest">${dep.destination || dep.direction || ''}</span>
+            <span class="bus-dest${destActive}" data-filter-type="dest" data-filter-value="${escapeHtml(dest)}">${escapeHtml(dest)}</span>
             <span class="bus-time ${timeClass}">${uncertainPrefix}${text}</span>
           </div>
           ${deviationHtml}
@@ -1481,6 +1608,7 @@ async function loadBuses() {
 
 // Vid byte av hållplats: töm listan och hämta direkt
 function resetDepartures() {
+  departureFilter = loadDepartureFilter(selectedStopId);
   departuresCache = null;
   departuresFetchedAt = 0;
   departuresFailingSince = 0;
@@ -1490,6 +1618,7 @@ function resetDepartures() {
 }
 
 populateStopSelect();
+departureFilter = loadDepartureFilter(selectedStopId);
 loadBuses();
 setInterval(renderDepartures, DEPARTURES_RENDER_MS);
 </script>
