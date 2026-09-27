@@ -4,6 +4,21 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.4.2 — 2026-09-27
+
+### Fixed
+- 1.4.1 broke the first data fetch of every panel on page load: `FETCH_TIMEOUT_MS`
+  was defined after the panels had already started fetching, so the direct request
+  failed with "Cannot access 'FETCH_TIMEOUT_MS' before initialization" and only the
+  CORS proxy was tried. On the tablet the bathing card showed that error, and would
+  have kept it for 12 hours. The constant is now defined at the top of the script.
+- The bathing card now retries after 10 minutes when fetching fails, instead of
+  waiting for the next 12-hour refresh.
+
+### Changed
+- The departures notice "Avgångarna har inte kunnat uppdateras sedan HH:MM" now
+  also shows the last error, so the cause of a stall can be read off the screen.
+
 ## 1.4.1 — 2026-09-27
 
 ### Fixed

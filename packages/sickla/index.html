@@ -639,10 +639,15 @@
 </div>
 
 <script>
+// ---------- Nätverk ----------
+// Tidsgräns för fetchJSON(). Måste stå överst: panelerna längre ner hämtar
+// data redan när skriptet körs, innan resten av skriptet har lästs in.
+const FETCH_TIMEOUT_MS = 20 * 1000;
+
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.4.1';
+const APP_VERSION = '1.4.2';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1079,6 +1084,9 @@ function bathingStatusClass(sampleAssessId) {
   return 'warn';
 }
 
+const BATHING_RETRY_MS = 10 * 60 * 1000;
+let bathingRetryTimer = null;
+
 async function loadBathingWater() {
   const advisoryBox = document.getElementById('bathingAdvisory');
   const tempEl = document.getElementById('bathingTemp');
@@ -1135,8 +1143,12 @@ async function loadBathingWater() {
     euEl.textContent = classifications.length > 0
       ? `EU-klass ${classifications[0].year}: ${classifications[0].qualityClassIdText}`
       : '';
+    clearTimeout(bathingRetryTimer);
   } catch (e) {
     reportsEl.textContent = `Kunde inte hämta badvattendata (${e.message})`;
+    // Nästa ordinarie hämtning är om 12 timmar; försök igen tidigare vid fel
+    clearTimeout(bathingRetryTimer);
+    bathingRetryTimer = setTimeout(loadBathingWater, BATHING_RETRY_MS);
   }
 }
 
@@ -1275,10 +1287,9 @@ setInterval(loadBathingWater, 12 * 60 * 60 * 1000); // provresultat tas normalt 
 // ---------- Robust fetch: försök direkt, falla tillbaka på CORS-proxy ----------
 // Om sidan öppnas som en lokal fil (file://) skickar webbläsaren "Origin: null",
 // vilket vissa API:er (som SL:s) nekar. Då används en CORS-proxy som fallback.
-// Varje anrop avbryts efter FETCH_TIMEOUT_MS: ett anrop som aldrig får svar
-// (t.ex. efter ett wifi-avbrott på plattan) skulle annars hänga för alltid.
-const FETCH_TIMEOUT_MS = 20 * 1000;
-
+// Varje anrop avbryts efter FETCH_TIMEOUT_MS (definierad överst i skriptet):
+// ett anrop som aldrig får svar (t.ex. efter ett wifi-avbrott på plattan)
+// skulle annars hänga för alltid.
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -1532,7 +1543,7 @@ function renderDepartures() {
     .sort((a, b) => new Date(a.expected) - new Date(b.expected));
 
   const staleHtml = failingLong
-    ? `<li class="status-msg">⚠ Avgångarna har inte kunnat uppdateras sedan ${new Date(departuresFetchedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}. Försöker igen…</li>`
+    ? `<li class="status-msg">⚠ Avgångarna har inte kunnat uppdateras sedan ${new Date(departuresFetchedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })} (${escapeHtml(departuresLastError)}). Försöker igen…</li>`
     : '';
 
   if (buses.length === 0) {
