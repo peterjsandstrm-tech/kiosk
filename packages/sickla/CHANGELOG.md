@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.4.1 — 2026-09-27
+
+### Fixed
+- Departures could stop updating for good (seen on the tablet: "Avgångarna har inte
+  kunnat uppdateras sedan 22:37" still shown the next morning, fixed only by switching
+  stop and back). Every network request now times out after 20 seconds instead of
+  waiting forever, and a watchdog restarts departure fetching if the scheduled
+  fetch is more than 30 seconds overdue — also covering a page that became visible
+  again without a `visibilitychange` event.
+
 ## 1.4.0 — 2026-09-26
 
 ### Added

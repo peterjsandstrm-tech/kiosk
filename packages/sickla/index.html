@@ -642,7 +642,7 @@
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1275,9 +1275,26 @@ setInterval(loadBathingWater, 12 * 60 * 60 * 1000); // provresultat tas normalt 
 // ---------- Robust fetch: försök direkt, falla tillbaka på CORS-proxy ----------
 // Om sidan öppnas som en lokal fil (file://) skickar webbläsaren "Origin: null",
 // vilket vissa API:er (som SL:s) nekar. Då används en CORS-proxy som fallback.
+// Varje anrop avbryts efter FETCH_TIMEOUT_MS: ett anrop som aldrig får svar
+// (t.ex. efter ett wifi-avbrott på plattan) skulle annars hänga för alltid.
+const FETCH_TIMEOUT_MS = 20 * 1000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('timeout');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchJSON(url) {
   try {
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const res = await fetchWithTimeout(url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) {
       const err = new Error(`HTTP ${res.status}`);
       err.status = res.status;
@@ -1290,7 +1307,7 @@ async function fetchJSON(url) {
     if (directErr.status) throw directErr;
     try {
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const res = await fetch(proxyUrl);
+      const res = await fetchWithTimeout(proxyUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status} (via proxy)`);
       return await res.json();
     } catch (proxyErr) {
@@ -1486,6 +1503,8 @@ let departuresFailingSince = 0;  // första misslyckade försöket i rad, 0 = in
 let departuresLastError = '';
 let departuresFailures = 0;
 let departuresTimer = null;
+let departuresNextFetchAt = 0;   // när nästa hämtning är planerad
+let departuresInFlight = 0;      // antal pågående hämtningar
 
 function renderDepartures() {
   const list = document.getElementById('busList');
@@ -1561,7 +1580,19 @@ function renderDepartures() {
 
 function scheduleDeparturesFetch(delayMs) {
   clearTimeout(departuresTimer);
+  departuresNextFetchAt = Date.now() + delayMs;
   departuresTimer = setTimeout(loadBuses, delayMs);
+}
+
+// Vakthund: om ingen hämtning pågår och den planerade hämtningen är mer än
+// 30 s försenad (timern har tappats, eller sidan blev synlig igen utan att
+// visibilitychange kom), starta hämtningen igen. Körs var 15:e sekund.
+function departuresWatchdog() {
+  if (document.hidden || departuresInFlight > 0) return;
+  if (Date.now() > departuresNextFetchAt + DEPARTURES_REFRESH_MS) {
+    departuresPaused = false;
+    loadBuses();
+  }
 }
 
 // Dolda sidor (t.ex. bakgrundsflikar på datorn) hämtar inte avgångar, så de
@@ -1583,6 +1614,7 @@ async function loadBuses() {
     return;
   }
   const stopId = selectedStopId;
+  departuresInFlight += 1;
   try {
     const data = await fetchJSON(`https://transport.integration.sl.se/v1/sites/${stopId}/departures`);
     if (stopId !== selectedStopId) return; // hållplatsen byttes medan vi väntade
@@ -1602,6 +1634,8 @@ async function loadBuses() {
     // 30 s, 60 s, 120 s, 240 s, sedan högst 5 min mellan försöken
     const backoff = Math.min(DEPARTURES_REFRESH_MS * 2 ** (departuresFailures - 1), DEPARTURES_MAX_BACKOFF_MS);
     scheduleDeparturesFetch(backoff);
+  } finally {
+    departuresInFlight -= 1;
   }
   renderDepartures();
 }
@@ -1620,7 +1654,10 @@ function resetDepartures() {
 populateStopSelect();
 departureFilter = loadDepartureFilter(selectedStopId);
 loadBuses();
-setInterval(renderDepartures, DEPARTURES_RENDER_MS);
+setInterval(() => {
+  renderDepartures();
+  departuresWatchdog();
+}, DEPARTURES_RENDER_MS);
 </script>
 </body>
 </html>
