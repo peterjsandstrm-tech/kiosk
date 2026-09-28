@@ -647,7 +647,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.4.3';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1505,6 +1505,10 @@ document.getElementById('busCard').addEventListener('click', (e) => {
 // Felmeddelande visas först när inga avgångar kunnat hämtas på 3 minuter.
 const DEPARTURES_REFRESH_MS = 30 * 1000;
 const DEPARTURES_MAX_BACKOFF_MS = 5 * 60 * 1000;
+// Serverfel hos SL (HTTP 5xx) beror inte på vår anropstakt, så där ökar vi inte
+// väntetiden: nytt försök efter 60 s, så att listan kommer tillbaka snart efter
+// att SL fungerar igen. Kvotfel (429) och övriga fel backar av som förut.
+const DEPARTURES_SERVER_ERROR_RETRY_MS = 60 * 1000;
 const DEPARTURES_STALE_MS = 3 * 60 * 1000;
 const DEPARTURES_RENDER_MS = 15 * 1000;
 
@@ -1642,8 +1646,11 @@ async function loadBuses() {
     departuresLastError = e.message;
     departuresFailures += 1;
     if (!departuresFailingSince) departuresFailingSince = Date.now();
-    // 30 s, 60 s, 120 s, 240 s, sedan högst 5 min mellan försöken
-    const backoff = Math.min(DEPARTURES_REFRESH_MS * 2 ** (departuresFailures - 1), DEPARTURES_MAX_BACKOFF_MS);
+    // Serverfel (5xx): nytt försök efter 60 s. Övriga fel (t.ex. 429):
+    // 30 s, 60 s, 120 s, 240 s, sedan högst 5 min mellan försöken.
+    const backoff = e.status >= 500
+      ? DEPARTURES_SERVER_ERROR_RETRY_MS
+      : Math.min(DEPARTURES_REFRESH_MS * 2 ** (departuresFailures - 1), DEPARTURES_MAX_BACKOFF_MS);
     scheduleDeparturesFetch(backoff);
   } finally {
     departuresInFlight -= 1;

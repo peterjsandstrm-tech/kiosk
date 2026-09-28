@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.4.3 — 2026-09-28
+
+### Changed
+- When SL answers departures with a server error (HTTP 5xx), the page now retries
+  every 60 seconds instead of backing off to as much as 5 minutes. Seen on the
+  tablet: "Avgångarna har inte kunnat uppdateras sedan 15:20 (HTTP 500)" for about
+  40 minutes while SL returned "Internal Server Error" for single stops; a longer
+  wait does not help against a server error and only delays the list coming back.
+  Quota errors (HTTP 429) and other failures back off as before (30 s → 5 min).
+
 ## 1.4.2 — 2026-09-27
 
 ### Fixed
