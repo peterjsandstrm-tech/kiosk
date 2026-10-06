@@ -4,6 +4,13 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.4.4 — 2026-10-06
+
+### Changed
+- The line-number badge in the departure list is slightly larger (font 0.95rem → 1.15rem,
+  padding 4×10 px → 5×12 px, min width 38 px → 46 px) so the bus number is easier to
+  read from a distance.
+
 ## 1.4.3 — 2026-09-28
 
 ### Changed
