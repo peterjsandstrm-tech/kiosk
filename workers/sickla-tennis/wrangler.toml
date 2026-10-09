@@ -1,0 +1,10 @@
+name = "sickla-tennis"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+
+# Served on its own subdomain of petersandstrom.com (the zone must be in the
+# same Cloudflare account). The kiosk page reads TENNIS_API_URL from here.
+routes = [
+  { pattern = "tennis.petersandstrom.com", custom_domain = true }
+]

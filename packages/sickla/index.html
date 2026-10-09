@@ -100,6 +100,131 @@
     flex-direction: column;
     align-items: center;
   }
+  /* Badvattenrutan har två sidor: bad och tennis. Svep åt sidan för att vända. */
+  .clock-card { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .clock-card.flipping { animation: card-flip 0.3s ease-in-out; }
+  @keyframes card-flip {
+    0% { transform: perspective(800px) rotateY(0deg); }
+    50% { transform: perspective(800px) rotateY(90deg); }
+    100% { transform: perspective(800px) rotateY(0deg); }
+  }
+  .card-face {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .card-face[hidden] { display: none; }
+  .card-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .card-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    opacity: 0.35;
+  }
+  .card-dots span.active { opacity: 1; }
+  .tennis-weeks {
+    display: flex;
+    gap: 6px;
+    margin: 6px 0 8px;
+  }
+  .tennis-week {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .tennis-week.active {
+    background: rgba(255, 209, 102, 0.18);
+    border-color: rgba(255, 209, 102, 0.6);
+    color: var(--accent);
+    font-weight: 700;
+  }
+  /* En kolumn per dag och en rad per timme; varje ruta delas i Bana 1 (vänster)
+     och Bana 2 (höger). Ett svart streck skiljer dagarna åt. */
+  .tennis-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.7em repeat(7, 1fr);
+    gap: 0;
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+  .tennis-msg { grid-column: 1 / -1; text-align: center; font-size: 0.78rem; padding: 20px 0; }
+  /* Strecket finns bara bredvid bokningsrutorna; rubrikerna får en osynlig
+     kant så att de står rakt ovanför sina rutor */
+  .tennis-day, .tennis-courts, .tennis-cell {
+    border-left: 1px solid transparent;
+    padding: 0 2px 0 3px;
+  }
+  /* Rutorna har luft uppåt och nedåt i stället för radavstånd, så att
+     strecket mellan dagarna blir heldraget */
+  .tennis-cell { border-left-color: #2a3140; padding-top: 1px; padding-bottom: 1px; }
+  .tennis-courts { padding-bottom: 2px; }
+  .tennis-courts {
+    display: flex;
+    gap: 2px;
+    font-size: 0.54rem;
+    line-height: 1.2;
+  }
+  .tennis-courts span { flex: 1; text-align: center; }
+  .tennis-day {
+    text-align: center;
+    line-height: 1.15;
+    padding-bottom: 2px;
+  }
+  .tennis-day.today { color: var(--accent); font-weight: 700; }
+  .tennis-hour {
+    text-align: right;
+    padding-right: 3px;
+    line-height: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tennis-cell {
+    display: flex;
+    gap: 2px;
+    height: 16px;
+    border-radius: 3px;
+  }
+  .tennis-cell.now i { box-shadow: 0 0 0 2px var(--accent); }
+  .tennis-cell i { flex: 1; border-radius: 2px; }
+  .tennis-swatch {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 3px;
+    vertical-align: -1px;
+  }
+  .tennis-cell i.free, .tennis-swatch.free { background: #34c759; }
+  .tennis-cell i.booked, .tennis-swatch.booked { background: #ff453a; }
+  .tennis-cell i.closed, .tennis-cell i.past, .tennis-swatch.closed { background: rgba(255,255,255,0.16); }
+  .tennis-cell i.unknown { border: 1px dashed rgba(255,255,255,0.3); }
+  .tennis-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 10px;
+    margin-top: 8px;
+    font-size: 0.66rem;
+    color: var(--muted);
+  }
+  .tennis-status {
+    margin-top: 4px;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-align: center;
+  }
   .bathing-title {
     font-size: 0.8rem;
     color: var(--muted);
@@ -602,13 +727,30 @@
       </div>
     </div>
     <div class="card clock-card" id="clockCard">
-      <div class="bathing-title">🏖️ Sickla strandbad</div>
-      <div class="bathing-middle">
-        <div class="bathing-advisory" id="bathingAdvisory"></div>
-        <div class="bathing-temp" id="bathingTemp">–°</div>
-        <div class="bathing-reports" id="bathingReports">Hämtar badvattendata…</div>
+      <div class="card-face" id="faceBathing">
+        <div class="bathing-title">🏖️ Sickla strandbad</div>
+        <div class="bathing-middle">
+          <div class="bathing-advisory" id="bathingAdvisory"></div>
+          <div class="bathing-temp" id="bathingTemp">–°</div>
+          <div class="bathing-reports" id="bathingReports">Hämtar badvattendata…</div>
+        </div>
+        <div class="bathing-eu" id="bathingEu"></div>
       </div>
-      <div class="bathing-eu" id="bathingEu"></div>
+      <div class="card-face" id="faceTennis" hidden>
+        <div class="bathing-title">🎾 Tennis Sicklasjöns BK</div>
+        <div class="tennis-weeks">
+          <button class="tennis-week" data-week="0">Denna vecka</button>
+          <button class="tennis-week" data-week="1">Nästa vecka</button>
+        </div>
+        <div class="tennis-grid" id="tennisGrid"><div class="tennis-msg">Hämtar bokningar…</div></div>
+        <div class="tennis-legend">
+          <span><i class="tennis-swatch free"></i>Ledig</span>
+          <span><i class="tennis-swatch booked"></i>Bokad</span>
+          <span><i class="tennis-swatch closed"></i>Stängt/passerat</span>
+        </div>
+        <div class="tennis-status" id="tennisStatus"></div>
+      </div>
+      <div class="card-dots" aria-hidden="true"><span data-face="bathing"></span><span data-face="tennis"></span></div>
     </div>
   </div>
 
@@ -634,7 +776,7 @@
     <div class="bo-list" id="bathingOverlayList"></div>
   </div>
 
-  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se · Radar: MET Norway</div>
+  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se · Radar: MET Norway · Tennis: Sicklasjöns BK (commodusnet.net)</div>
   <div class="footer-note">Skapad av Sandstream · <span id="appVersion"></span></div>
 </div>
 
@@ -647,7 +789,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.4.4';
+const APP_VERSION = '1.5.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1262,6 +1404,8 @@ function closeBathingOverlay() {
 
 document.getElementById('clockCard').addEventListener('click', (e) => {
   e.stopPropagation();
+  // Ett svep ska bara vända rutan, och på tennissidan öppnas inga badprov
+  if (suppressCardClick || cardFace !== 'bathing') return;
   openBathingOverlay();
 });
 document.getElementById('bathingOverlayClose').addEventListener('click', (e) => {
@@ -1283,6 +1427,168 @@ window.addEventListener('resize', () => {
 
 loadBathingWater();
 setInterval(loadBathingWater, 12 * 60 * 60 * 1000); // provresultat tas normalt högst en gång per dag, ingen live-temperatur
+
+// ---------- Tennis: bokningsläget för Sicklasjöns BK:s två banor ----------
+// Badvattenrutan vänds till tennissidan med ett svep åt vänster eller höger
+// (eller ett tryck på prickarna). Sidan står kvar tills man sveper tillbaka,
+// och valet sparas så att den överlever en omladdning.
+// Klubbens bokningssida (commodusnet.net) saknar CORS och har en sida per dag,
+// så datan går via en egen Cloudflare Worker (workers/sickla-tennis i repot)
+// som läser dagssidorna, bara skickar ledig/bokad/stängd/passerad (inga namn)
+// och cachar varje dag i 15 minuter.
+const TENNIS_API_URL = 'https://tennis.petersandstrom.com/';
+const TENNIS_REFRESH_MS = 15 * 60 * 1000;
+const TENNIS_RETRY_MS = 2 * 60 * 1000;
+const CARD_FACE_STORAGE_KEY = 'kiosk-sickla-card-face';
+const SWIPE_MIN_PX = 40;
+const WEEKDAYS_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
+
+let cardFace = 'bathing';
+try {
+  if (localStorage.getItem(CARD_FACE_STORAGE_KEY) === 'tennis') cardFace = 'tennis';
+} catch (e) { /* utan lagring visas badsidan */ }
+let suppressCardClick = false;
+let tennisWeek = 0; // 0 = denna vecka, 1 = nästa
+// Per vecka: senaste svaret, när det hämtades, senaste försöket och felet
+const tennisState = [0, 1].map(() => ({ data: null, fetchedAt: 0, attemptAt: 0, error: null, loading: false }));
+
+async function loadTennis(week) {
+  const state = tennisState[week];
+  if (state.loading) return;
+  state.loading = true;
+  state.attemptAt = Date.now();
+  try {
+    const res = await fetchWithTimeout(`${TENNIS_API_URL}?week=${week}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !Array.isArray(data.days)) throw new Error(data.error || `HTTP ${res.status}`);
+    state.data = data;
+    state.fetchedAt = Date.now();
+    state.error = null;
+  } catch (e) {
+    state.error = e.message; // senaste lyckade svaret ligger kvar
+  } finally {
+    state.loading = false;
+  }
+  if (week === tennisWeek && cardFace === 'tennis') renderTennis();
+}
+
+// Hämta bara när tennissidan syns: var 15:e minut, efter fel efter 2 minuter
+function tennisTick() {
+  if (cardFace !== 'tennis' || document.hidden) return;
+  const state = tennisState[tennisWeek];
+  const wait = state.error ? TENNIS_RETRY_MS : TENNIS_REFRESH_MS;
+  if (Date.now() - state.attemptAt >= wait) loadTennis(tennisWeek);
+  renderTennis(); // flytta markeringen för pågående timme
+}
+
+function renderTennis() {
+  const grid = document.getElementById('tennisGrid');
+  const statusEl = document.getElementById('tennisStatus');
+  document.querySelectorAll('.tennis-week').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.week) === tennisWeek);
+  });
+
+  const state = tennisState[tennisWeek];
+  const data = state.data;
+  if (!data) {
+    grid.innerHTML = `<div class="tennis-msg">${state.error ? `Kunde inte hämta bokningar (${escapeHtml(state.error)})` : 'Hämtar bokningar…'}</div>`;
+    statusEl.textContent = '';
+    return;
+  }
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const todayIso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const currentHour = pad(now.getHours());
+
+  let html = '<div></div>';
+  data.days.forEach((day, i) => {
+    const dayNumber = Number(day.date.slice(8, 10));
+    html += `<div class="tennis-day${day.date === todayIso ? ' today' : ''}">${WEEKDAYS_SHORT[i]}<br>${dayNumber}</div>`;
+  });
+  // Rubrikrad med banorna under varje dag: "Bana 1" blir "B1"
+  const courtLabels = data.courts.map(c => escapeHtml(c.replace(/^Bana\s*/i, 'B')));
+  html += '<div></div>' + data.days.map(() => `<div class="tennis-courts">${courtLabels.map(c => `<span>${c}</span>`).join('')}</div>`).join('');
+  for (const hour of data.hours) {
+    html += `<div class="tennis-hour">${escapeHtml(hour)}</div>`;
+    for (const day of data.days) {
+      let states;
+      if (day.past) states = data.courts.map(() => 'past');
+      else if (day.error || !day.slots || !day.slots[hour]) states = data.courts.map(() => 'unknown');
+      else states = day.slots[hour];
+      const isNow = day.date === todayIso && hour === currentHour;
+      const title = data.courts.map((c, k) => `${c}: ${states[k]}`).join(', ');
+      html += `<div class="tennis-cell${isNow ? ' now' : ''}" title="${escapeHtml(title)}">${states.map(s => `<i class="${escapeHtml(s)}"></i>`).join('')}</div>`;
+    }
+  }
+  grid.innerHTML = html;
+
+  const first = new Date(`${data.days[0].date}T12:00:00`);
+  const last = new Date(`${data.days[data.days.length - 1].date}T12:00:00`);
+  const range = `${first.getDate()}–${last.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}`;
+  const updated = new Date(state.fetchedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  const courts = data.courts.map(c => `${c.replace(/^Bana\s*/i, 'B')} = ${c}`).join(', ');
+  const failedDays = data.days.filter(d => d.error).length;
+  let status = `Vecka ${data.week} · ${range} · ${courts} · uppdaterad ${updated}`;
+  if (failedDays) status += ` · ${failedDays} dag(ar) saknas`;
+  if (state.error) status += ` · ⚠ kunde inte uppdatera (${state.error})`;
+  statusEl.textContent = status;
+}
+
+function showCardFace(face, animate) {
+  const card = document.getElementById('clockCard');
+  cardFace = face;
+  try { localStorage.setItem(CARD_FACE_STORAGE_KEY, face); } catch (e) { /* ignoreras */ }
+  const apply = () => {
+    document.getElementById('faceBathing').hidden = face !== 'bathing';
+    document.getElementById('faceTennis').hidden = face !== 'tennis';
+    card.querySelectorAll('.card-dots span').forEach(dot => {
+      dot.classList.toggle('active', dot.dataset.face === face);
+    });
+    if (face === 'tennis') tennisTick();
+  };
+  if (!animate) { apply(); return; }
+  card.classList.remove('flipping');
+  void card.offsetWidth; // starta om animationen
+  card.classList.add('flipping');
+  setTimeout(apply, 150); // byt innehåll när rutan står på kant
+  setTimeout(() => card.classList.remove('flipping'), 320);
+}
+
+(function setupCardSwipe() {
+  const card = document.getElementById('clockCard');
+  let start = null;
+  card.addEventListener('pointerdown', (e) => { start = { x: e.clientX, y: e.clientY }; });
+  card.addEventListener('pointercancel', () => { start = null; });
+  card.addEventListener('pointerup', (e) => {
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    start = null;
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < 1.5 * Math.abs(dy)) return;
+    suppressCardClick = true;
+    setTimeout(() => { suppressCardClick = false; }, 400);
+    showCardFace(cardFace === 'bathing' ? 'tennis' : 'bathing', true);
+  });
+  card.querySelectorAll('.card-dots span').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dot.dataset.face !== cardFace) showCardFace(dot.dataset.face, true);
+    });
+  });
+  document.querySelectorAll('.tennis-week').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tennisWeek = Number(btn.dataset.week);
+      renderTennis();
+      tennisTick();
+    });
+  });
+})();
+
+showCardFace(cardFace, false);
+setInterval(tennisTick, 60 * 1000);
+document.addEventListener('visibilitychange', tennisTick);
 
 // ---------- Robust fetch: försök direkt, falla tillbaka på CORS-proxy ----------
 // Om sidan öppnas som en lokal fil (file://) skickar webbläsaren "Origin: null",

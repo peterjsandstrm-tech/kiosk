@@ -4,6 +4,25 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.5.0 — 2026-10-09
+
+### Added
+- The bathing-water card has a second side with the booking status of the two outdoor
+  tennis courts of Sicklasjöns BK. Swipe the card left or right (or tap the dots under
+  it) to turn it; it stays on the chosen side, also after a reload, until it is turned back.
+- The tennis side shows the current week (Monday–Sunday) with one column per day and one
+  row per hour; each cell is split into Bana 1 (left) and Bana 2 (right). Green = free,
+  red = booked, grey = closed or already passed. The current hour is outlined.
+  "Nästa vecka" shows the following week. No names of the people who booked are shown.
+- The data is fetched only while the tennis side is shown, every 15 minutes (after an
+  error, a new attempt after 2 minutes; the last good data stays on screen). It comes from
+  a new Cloudflare Worker, `workers/sickla-tennis` (`https://tennis.petersandstrom.com/`),
+  because the club's booking system (commodusnet.net) has no CORS headers and public
+  CORS proxies could not reach it reliably.
+- Automated tests in `tests/` (run with `node --test tests/*.test.mjs`): unit tests for the
+  Worker against anonymised copies of the booking pages, and a headless-Chromium test of
+  the tennis side (swipe, week buttons, colours, errors, no names on the page).
+
 ## 1.4.4 — 2026-10-06
 
 ### Changed

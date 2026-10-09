@@ -1,0 +1,268 @@
+
+<!-- ----------------------------------------------------------------
+     PROGRAM
+       schedule   Customer part
+
+     DESCRIPTION
+       Schedule generates the time schedule for a certain date
+
+     ENVIRONMENT
+       USER    - User
+       CN      - Checksum
+       YEAR    - Current year
+       MONTH   - Current month
+       DAY     - Current day
+
+----------------------------------------------------------------- -->
+
+
+<HTML>
+
+<HEAD>
+<link rel="shortcut icon" href="graphics/tennis.ico">
+   <link href="css/styleNewSchemaTest3.css" rel="stylesheet" type="text/css">
+        <!-- Latest compiled and minified CSS -->
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+       <!-- jQuery library -->
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+       <!-- Popper JS -->
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+       <!-- Latest compiled JavaScript -->
+       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+       <style>
+       .bgcolor {
+         background-color: #F1F1F1       }
+       </style>
+   	       
+	<STYLE TYPE="text/css">
+
+a.book:link {  color: #FFFFFF; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book:active {  color: #FFFFFF; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book:visited {  color: #FFFFFF; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.new_color:link {  color: #FF8C00; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.new_color:active {  color: #FF8C00; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.new_color:visited {  color: #FF8C00; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.new_color:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.stepin:link {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.stepin:active {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.stepin:visited {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.stepin:hover {  color: #F08080; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.groupbooking:link {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.groupbooking:active {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.groupbooking:visited {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.groupbooking:hover {  color: #F08080; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.book1:link {  color: #F5F5DC; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book1:active {  color: #F5F5DC; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book1:visited {  color: #F5F5DC; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book1:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.book2:link {  color: #DEB887; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book2:active {  color: #DEB887; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book2:visited {  color: #DEB887; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book2:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.book3:link {  color: #CD853F; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book3:active {  color: #CD853F; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book3:visited {  color: #CD853F; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book3:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.book4:link {  color: #E6E6FA; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book4:active {  color: #E6E6FA; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book4:visited {  color: #E6E6FA; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.book4:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.unbook:link {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbook:active {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbook:visited {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbook:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+
+
+
+
+a.unbookcontract:link {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbookcontract:active {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbookcontract:visited {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.unbookcontract:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+
+a.deletecontract:link {  color: #4682B4; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.deletecontract:active {  color: #4682B4; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.deletecontract:visited {  color: #4682B4; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+a.deletecontract:hover {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em;}
+
+a.reserve{text-decoration:none; font-family: "Times New Roman", courier, serif; font-weight: bold; font-size:8px;
+		background: silver; color: black; position: relative; left: 39px; top: 4px; padding:1px }
+a.reserve2{text-decoration:none; font-family: "Times New Roman", courier, serif; font-weight: bold; font-size:8px;
+		background: red; color: black; position: relative; left: 39px; top: 4px; padding:1px }
+a.reserve1{text-decoration:none; text-transform:uppercase; font-family: verdana, courier, sans-serif; font-size:8pt; font-weight: bold;
+		color: black; }
+
+td, th { color: #000000;  }
+p.redtime { color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em; }
+p.reserverad {  color: #000000; text-decoration: none; font-weight: bold; font-size: 0.675em; }
+
+p.advertising {
+	font-size: 2.0em;
+	line-height: 1.550em;
+	color: #;
+	display:inline;
+	vertical-align:top;
+}
+
+.position_sticky{
+	z-index: 1000;
+	overflow: hidden !important;
+	top: 0; /* required */
+
+	right: 0;
+}
+
+td.position_sticky{
+	padding:10px;
+	border: 0.1px solid #000000;
+	padding-right:10px;
+ }
+
+th.position_sticky{
+	padding:10px;
+	border: 1px solid #000000;
+	padding-right:10px;
+
+	text-align: left;
+	background: #fafafa;
+	background-clip: padding-box;
+
+	font-size: 0.95em;
+	line-height: 1.2em;
+ }
+
+
+
+
+thead th.position_sticky:first-child {
+	left: 0;
+	z-index: 1;
+}
+tbody th.position_sticky:first-child  {
+	text-align: left;
+	position: -webkit-sticky; /* for Safari */
+	position: sticky;
+	left: 0;
+}
+
+
+
+
+
+
+</STYLE>
+<!--meta name="viewport" content="width=device-width"-->
+<meta name="viewport" content="initial-scale=1" />
+
+	</HEAD>
+
+<BODY class="bgcolor" TEXT="#000000" BGCOLOR="#F1F1F1" LINK="#000000" VLINK="#000000"ALINK="#000000">
+<TITLE>Sicklasjöns BK Internetbokningssystem</TITLE>
+<INPUT TYPE=HIDDEN NAME=USER VALUE=>
+<INPUT TYPE=HIDDEN NAME=CN VALUE=>
+<INPUT TYPE=HIDDEN NAME=PASSWORD VALUE=>
+<INPUT TYPE=HIDDEN NAME=user_id VALUE=>
+<INPUT TYPE=HIDDEN NAME=sess_adm_club_id VALUE=59>
+<form name=print>
+<INPUT TYPE=HIDDEN NAME=print_done VALUE="">
+</form>
+<div id="pagewrap">
+    <div id="content">
+<script language="JavaScript" type="text/javascript">
+
+<!--
+
+function new_window(url){
+    link=window.open(url,"","width=580, height=520, left=200, top=50, scrollbars=no");
+}
+
+function new_window_buffer(url){
+    link=window.open(url,"","width=380, height=520, left=200, top=50, scrollbars=yes,resizable=yes");
+}
+
+
+function verify(y, m, d, h, name)
+{
+    var text;
+
+    switch (m)
+    {
+        case "01":
+            m = "Jan";
+            break;
+        case "02":
+            m = "Feb";
+            break;
+        case "03":
+            m = "Mar";
+            break;
+        case "04":
+            m = "Apr";
+            break;
+        case "05":
+            m = "Maj";
+            break;
+        case "06":
+            m = "Jun";
+            break;
+        case "07":
+            m = "Jul";
+            break;
+        case "08":
+            m = "Aug";
+            break;
+        case "09":
+            m = "Sep";
+            break;
+        case "10":
+            m = "Okt";
+            break;
+        case "11":
+            m = "Nov";
+            break;
+        case "12":
+            m = "Dec";
+        break;
+    }
+
+    text = "Är du säker på att du vill ta bort bokningen av\n";
+    text += ""+name+ " den "+d+ ":e "+m+ " "+y+ "?";
+    return window.confirm(text);
+}
+//-->
+</script>
+
+
+<TABLE BORDER=0 WIDTH=100% cellspacing=0 cellpadding=0><TR><TD><TABLE class="border border-dark" BORDER=0 WIDTH="700" BGCOLOR="#FFFFFF"><TR><TD colspan="2"><center><TABLE><TR><TD><p class="headline"> Torsdagen den 15 Oktober 2026</p></TD></TR></TABLE><TABLE border=0 width="100%"><TR><TD WIDTH=10></TD><TD BGCOLOR="#ffffcc" WIDTH=15><BR></TD><TD><p class="text">- Bokade strötider</TD><TD WIDTH=5></TD><TD BGCOLOR="#ffa6a6" WIDTH=15><BR></TD><TD><p class="text">- Ej bokningsbara tider</TD><TD WIDTH=5></TD><TD BGCOLOR="#ccccff" WIDTH=15 ><BR></TD><TD ><p class="text">- Kontraktstider </TD><TD WIDTH=5></TD></TR></TABLE><BR><TABLE BORDER=0 width="98%"><TR><TD><TD><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="<< Föregående dag" onClick="location.href='adminschedule.php?YEAR=2026&MONTH=10&DAY=14&sess_adm_club_id=59&indoors=1&court_group='"> </TD><TD ALIGN="LEFT"><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="Välj ny dag" onClick="location='aselect.php?sess_adm_club_id=59'"> </TD> <TD><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="Nästa dag >>" onClick="location.href='adminschedule.php?YEAR=2026&MONTH=10&DAY=16&sess_adm_club_id=59&indoors=1&court_group='"> </TD></TR></TABLE><TABLE BORDER=0 width="98%"><TR><TD ALIGN="LEFT" VALIGN="TOP" width="320"><a class="color_black" href="register.php?sess_adm_club_id=59&STATE=3&YEAR=2026&MONTH=10&DAY=15"><p class="text_middle"><b>Registrera dig som strötidskund</b></p></A></TD><TD ALIGN="LEFT" VALIGN="TOP" ><a href="getpwd.php?YEAR=2026&MONTH=10&DAY=15&sess_adm_club_id=59" class="color_black"><p class="text_middle">Om du har glömt ditt lösenord</p></a><BR></TD></TD></TR></TD></TR></TABLE><table width="100%" border=0 style="border: 1px solid black;" bgcolor="silver" ><tr><td height="25" align=center><A class=reserve1 HREF="boka_reserve_reg_client_app.php?sess_adm_club_id=59&YEAR=2026&MONTH=10&DAY=15" onMouseOver="window.status='Systemtillägg med möjlighet att boka reservtider är aktiverad.';return true; " >Anmäl dig som reserv här!</A></td></TR></TABLE></TR></TD><TR><TD><TABLE cellspacing=0 cellpadding=0 class="fixed_header border_collapse" BORDER=0 ><TR><TD class="border_schedule"><BR></TD><TD class="border_schedule" NOWRAP><p class="text_middle_bana"><B>Bana 1</B></p><p = class="text_bana">Utomhus<br></p></TD><TD class="border_schedule" NOWRAP><p class="text_middle_bana"><B>Bana 2</B></p><p = class="text_bana">Utomhus<br></p></TD></TR><TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>08:00-09:00</TH><TD class="position_sticky" width=102 height=40 bgcolor="#ccccff"><A class="unbookcontract" HREF="#" ><CENTER>Kontrakt Anonym</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=8&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>09:00-10:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=9&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=9&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>10:00-11:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=10&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=10&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>11:00-12:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=11&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=11&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>12:00-13:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=12&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=12&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>13:00-14:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=13&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=13&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>14:00-15:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=14&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=14&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>15:00-16:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=15&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=15&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>16:00-17:00</TH><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=16&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=16&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>17:00-18:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=17&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=17&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>18:00-19:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=18&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=18&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>19:00-20:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=19&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=19&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>20:00-21:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=20&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=20&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR></TR></TABLE></TD></TR></TABLE></TR></TABLE>
+&nbsp;
+<a class="foot" href="http://www.commodusnet.net" target="_blank">Copyright Commodus NetSystem AB</a>
+
+<br>
+
+</BODY>
+
+</HTML>
+</div></div></div><div id="contentSmall"><TABLE BORDER=0 WIDTH=100% cellspacing=0 cellpadding=0><TR><TD><TABLE class="border border-dark" BORDER=0 WIDTH="500" BGCOLOR="#FFFFFF"><TR><TD colspan="2"><center><TABLE><TR><TD><p class="headline"> Torsdagen den 15 Oktober 2026</p></TD></TR></TABLE><TABLE border=0 width="100%"><TR><TD WIDTH=10></TD><TD BGCOLOR="#ffffcc" WIDTH=15><BR></TD><TD><p class="text">- Bokade strötider</TD><TD WIDTH=5></TD><TD BGCOLOR="#ffa6a6" WIDTH=15><BR></TD><TD><p class="text">- Ej bokningsbara tider</TD><TD WIDTH=5></TD><TD BGCOLOR="#ccccff" WIDTH=15 ><BR></TD><TD ><p class="text">- Kontraktstider </TD><TD WIDTH=5></TD></TR></TABLE><BR><TABLE BORDER=0 width="98%"><TR><TD><TD><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="<< Föregående dag" onClick="location.href='adminschedule.php?YEAR=2026&MONTH=10&DAY=14&sess_adm_club_id=59&indoors=1&court_group='"> </TD><TD ALIGN="LEFT"><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="Välj ny dag" onClick="location='aselect.php?sess_adm_club_id=59'"> </TD> <TD><INPUT class="btn btn-primary" TYPE="BUTTON" VALUE="Nästa dag >>" onClick="location.href='adminschedule.php?YEAR=2026&MONTH=10&DAY=16&sess_adm_club_id=59&indoors=1&court_group='"> </TD></TR></TABLE><TABLE BORDER=0 width="98%"><TR><TD ALIGN="LEFT" VALIGN="TOP" width="320"><a class="color_black" href="register.php?sess_adm_club_id=59&STATE=3&YEAR=2026&MONTH=10&DAY=15"><p class="text_middle"><b>Registrera dig som strötidskund</b></p></A></TD><TD ALIGN="LEFT" VALIGN="TOP" ><a href="getpwd.php?YEAR=2026&MONTH=10&DAY=15&sess_adm_club_id=59" class="color_black"><p class="text_middle">Om du har glömt ditt lösenord</p></a><BR></TD></TD></TR></TD></TR></TABLE><table width="100%" border=0 style="border: 1px solid black;" bgcolor="silver" ><tr><td height="25" align=center><A class=reserve1 HREF="boka_reserve_reg_client_app.php?sess_adm_club_id=59&YEAR=2026&MONTH=10&DAY=15" onMouseOver="window.status='Systemtillägg med möjlighet att boka reservtider är aktiverad.';return true; " >Anmäl dig som reserv här!</A></td></TR></TABLE></TR></TD><TR><TD><TABLE cellspacing=0 cellpadding=0 class="fixed_header border_collapse" BORDER=0 ><TR><TD class="border_schedule"><BR></TD><TD class="border_schedule" NOWRAP><p class="text_middle_bana"><B>Bana 1</B></p><p = class="text_bana">Utomhus<br></p></TD><TD class="border_schedule" NOWRAP><p class="text_middle_bana"><B>Bana 2</B></p><p = class="text_bana">Utomhus<br></p></TD></TR><TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>08:00-09:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=8&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=8&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>09:00-10:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=9&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=9&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>10:00-11:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=10&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=10&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>11:00-12:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=11&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=11&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>12:00-13:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=12&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=12&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>13:00-14:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=13&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=13&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>14:00-15:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=14&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=14&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>15:00-16:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=15&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=15&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>16:00-17:00</TH><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=16&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD><TD class="position_sticky" width=102 height=40 bgcolor="#ffffcc"><A class="unbook" HREF="boka_login.php?sess_adm_club_id=59&STATE=4&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=16&MIN=0&BOOKUSER=anonym" ><CENTER>Anonym Bokning</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>17:00-18:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=17&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=17&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>18:00-19:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=18&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=18&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>19:00-20:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=19&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=19&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR><TR><TH class="position_sticky" width=102 height=40 align=center><p class="text"><B>20:00-21:00</TH><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=1&YEAR=2026&MONTH=10&DAY=15&HOUR=20&MIN=0" ><CENTER>Boka</CENTER></A></TD><TD class="position_sticky" width=102 height=40><A CLASS="book" HREF="boka_login.php?sess_adm_club_id=59&STATE=3&ITEM=2&YEAR=2026&MONTH=10&DAY=15&HOUR=20&MIN=0" ><CENTER>Boka</CENTER></A></TD></TR></TR></TABLE></TD></TR></TABLE></TR></TABLE>
+&nbsp;
+<a class="foot" href="http://www.commodusnet.net" target="_blank">Copyright Commodus NetSystem AB</a>
+
+<br>
+
+</BODY>
+
+</HTML>
+</div></div></div></div>
