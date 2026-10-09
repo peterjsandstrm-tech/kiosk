@@ -230,6 +230,47 @@ test('day separators sit only beside the booking cells', async () => {
   assert.equal(borders.rowGap, '0px'); // solid line from top to bottom
 });
 
+test('weather card: the rain radar sits at the bottom when the card is taller', async () => {
+  // The tennis side makes the top row taller than the weather content
+  const geometry = () => evaluate(`(() => {
+    const card = document.querySelector('.weather-card').getBoundingClientRect();
+    const top = document.querySelector('.weather-card .temp-row').getBoundingClientRect();
+    const nowcast = document.getElementById('nowcast').getBoundingClientRect();
+    const forecast = document.getElementById('forecastRow').getBoundingClientRect();
+    return { cardTop: card.top, cardBottom: card.bottom, topRow: top.top, forecastBottom: forecast.bottom, nowcastBottom: nowcast.bottom };
+  })()`);
+  await evaluate(`document.getElementById('nowcast').classList.add('visible')`);
+  let g = await geometry();
+  assert.ok(g.cardBottom - g.nowcastBottom <= 30, `radar at the bottom edge (gap ${g.cardBottom - g.nowcastBottom}px)`);
+  await evaluate(`document.getElementById('nowcast').classList.remove('visible')`);
+  g = await geometry();
+  const above = g.topRow - g.cardTop, below = g.cardBottom - g.forecastBottom;
+  assert.ok(Math.abs(above - below) <= 4, `without radar the content is centred (${above}px above, ${below}px below)`);
+});
+
+test('rain radar text never breaks between a number and its unit', async () => {
+  // Steady moderate rain for the next 2 hours gives the longest text
+  const result = await evaluate(`(() => {
+    const now = Date.now();
+    nowcastData = { temp: 8, points: Array.from({ length: 25 }, (_, i) => ({ time: now + i * 5 * 60000, rate: 2 })) };
+    renderNowcast();
+    const el = document.getElementById('nowcastText');
+    const keep = el.querySelector('.nowcast-keep');
+    if (!keep) return { text: el.textContent };
+    const lineCount = (node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return new Set([...range.getClientRects()].map(r => Math.round(r.top))).size;
+    };
+    return { text: el.textContent, keep: keep.textContent, keepLines: lineCount(keep), totalLines: lineCount(el) };
+  })()`);
+  assert.match(result.text, /^\S+ regn nu, fortsätter närmaste 2\u00a0h$/);
+  assert.equal(result.keep, 'fortsätter närmaste 2\u00a0h', 'second half kept together');
+  assert.equal(result.keepLines, 1, '"fortsätter närmaste 2 h" is on one line');
+  assert.ok(result.totalLines <= 2, 'at most two lines, broken after the comma');
+  await evaluate(`nowcastData = null; renderNowcast()`);
+});
+
 test('no names of people who booked appear on the page', async () => {
   assert.equal(await evaluate(`/Anonym|Kontrakt/.test(document.body.innerHTML)`), false);
 });

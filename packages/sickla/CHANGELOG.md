@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.5.1 — 2026-10-09
+
+### Changed
+- When the weather card is taller than its content (next to the tennis side), the rain
+  radar and its text sit at the bottom edge of the card instead of in the middle; the
+  temperature and forecast stay centred above. Without the radar the content is centred
+  as before.
+- The rain radar text never separates a number from its unit ("2 h", "ca 75 min"), and a
+  long text breaks after the comma: "Kraftigt regn nu," / "fortsätter närmaste 2 h".
+
 ## 1.5.0 — 2026-10-09
 
 ### Added

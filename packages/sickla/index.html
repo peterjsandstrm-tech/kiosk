@@ -428,9 +428,15 @@
   .nowcast {
     display: none;
     width: 100%;
-    margin-top: 8px;
+    padding-top: 8px;
   }
-  .nowcast.visible { display: block; }
+  /* När väderrutan blir högre än innehållet (t.ex. bredvid tennissidan) hamnar
+     regnradarn vid nederkanten och resten står centrerat ovanför. Utan radar
+     centreras innehållet som förut. */
+  .nowcast.visible { display: block; margin-top: auto; }
+  .weather-card .temp-row { margin-top: auto; }
+  .weather-card .forecast-row { margin-bottom: auto; }
+  .nowcast-keep { white-space: nowrap; }
   .nowcast-text {
     font-size: 0.9rem;
     font-weight: 600;
@@ -789,7 +795,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.5.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1181,17 +1187,27 @@ function renderNowcast() {
   const kind = `${strength} ${type}`;
   const minutesUntil = t => Math.max(0, Math.round((t - now) / 60000 / 5) * 5);
 
-  let text;
+  // Hårda mellanslag (\u00a0) håller ihop "2 h" och "ca 75 min" så att en
+  // radbrytning aldrig skiljer talet från enheten. Andra halvan av meningen
+  // hålls ihop (white-space: nowrap), så att en lång text bryts efter kommat.
+  const NB = '\u00a0';
+  let lead, rest;
   const startIndex = points.findIndex(p => p.rate >= NOWCAST_MIN_RATE);
   if (startIndex === 0) {
     const stopIndex = points.findIndex(p => p.rate < NOWCAST_MIN_RATE);
-    text = stopIndex === -1
-      ? `${kind} nu, fortsätter närmaste 2 h`
-      : `${kind} nu, upphör om ca ${minutesUntil(points[stopIndex].time)} min`;
+    lead = `${kind} nu, `;
+    rest = stopIndex === -1
+      ? `fortsätter närmaste 2${NB}h`
+      : `upphör om ca${NB}${minutesUntil(points[stopIndex].time)}${NB}min`;
   } else {
-    text = `${kind} om ca ${minutesUntil(points[startIndex].time)} min`;
+    lead = `${kind} `;
+    rest = `om ca${NB}${minutesUntil(points[startIndex].time)}${NB}min`;
   }
-  document.getElementById('nowcastText').textContent = text;
+  const textEl = document.getElementById('nowcastText');
+  const restEl = document.createElement('span');
+  restEl.className = 'nowcast-keep';
+  restEl.textContent = rest;
+  textEl.replaceChildren(lead, restEl);
 
   // Staplar: roten ur ger synliga staplar även för lätt regn; 8 mm/h fyller hela höjden
   document.getElementById('nowcastBars').innerHTML = points.map(p => {
