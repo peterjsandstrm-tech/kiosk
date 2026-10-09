@@ -62,16 +62,12 @@ function isoWeekNumber(iso) {
 
 // ---------- Parsing a day page ----------
 
-// The page is ISO-8859-1. Only ASCII markers are matched, but decode byte by
-// byte so that nothing breaks on "Stängt" and other non-ASCII text.
-function decodeLatin1(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let text = '';
-  for (let i = 0; i < bytes.length; i += 8192) {
-    text += String.fromCharCode(...bytes.subarray(i, i + 8192));
-  }
-  return text;
-}
+// The page is ISO-8859-1, but only ASCII is used from it: "Boka", "Ej
+// Bokningsbar", the colour codes and "Bana N". The built-in UTF-8 decoder
+// turns the odd non-ASCII byte (as in "Stängt") into U+FFFD and is about ten
+// times faster than decoding byte by byte in JavaScript, which used more than
+// half of the free plan's 10 ms CPU time per request.
+const decoder = new TextDecoder();
 
 // Cell text is "Boka" (free), "Ej Bokningsbar" (time has passed or cannot be
 // booked), "Stängt" on a red background (closed) or the booker's name on a
@@ -92,11 +88,11 @@ function parseDayPage(html) {
   }
   if (courts.length === 0) throw new Error('no courts found on the page');
 
-  // The schedule table occurs twice in the page; keep the first row per hour
+  // The schedule table occurs twice in the page; stop at the first repeated hour
   const slots = {};
   for (const m of html.matchAll(/<B>(\d\d):\d\d-\d\d:\d\d<\/TH>([\s\S]*?)<\/TR>/gi)) {
     const hour = m[1];
-    if (slots[hour]) continue;
+    if (slots[hour]) break;
     const cells = [...m[2].matchAll(/<TD([^>]*)>([\s\S]*?)<\/TD>/gi)].slice(0, courts.length);
     if (cells.length < courts.length) continue;
     slots[hour] = cells.map(c => classifyCell(c[1], c[2]));
@@ -121,7 +117,7 @@ async function fetchDay(iso, ctx) {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from the booking system`);
-  const day = { date: iso, ...parseDayPage(decodeLatin1(await res.arrayBuffer())) };
+  const day = { date: iso, ...parseDayPage(decoder.decode(await res.arrayBuffer())) };
 
   const toCache = new Response(JSON.stringify(day), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': `max-age=${CACHE_SECONDS}` },
