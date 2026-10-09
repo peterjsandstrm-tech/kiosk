@@ -1,0 +1,74 @@
+{
+ "id": 1655,
+ "name": "Saltsjöbadens Skidarena",
+ "place": "",
+ "websites": [
+  "https://www.saltisskidor.se/"
+ ],
+ "general_description": "Spårkarta och uppgift om SWISH-nummer finns vid Start/Mål",
+ "municipality": {
+  "id": 19,
+  "county": 1,
+  "name": "Nacka",
+  "code": 182,
+  "codedname": "nacka"
+ },
+ "coded_name": "saltsjobadens-skidarena",
+ "coded_path": "stockholm/nacka/saltsjobadens-skidarena",
+ "description": "Arenan är normalt öppen kl 06 – 21. På fredag och lördag stängs den dock kl 18.",
+ "numLikes": 0,
+ "numSubscribers": 80,
+ "lat": 59.282798767089844,
+ "lng": 18.27039909362793,
+ "contact": "klubbchef@saltsjobadengk.se",
+ "responsibleOperations": "Saltsjöbadens Golfklubb",
+ "routeDescription": "Om du kommer Saltsjöbadsleden sväng höger vid Circle K, följ vägen rakt fram, strax efter skarp kurva till höger sväng vänster till tunnel under husen, sväng höger efter tunneln. Det är också skyltat ”Saltsjöbadens Golfbana”. Närmaste kollektivtrafik är Saltsjöbanans station Tippen, ca 5 min promenad",
+ "trackOverview": {
+  "shortestTrack": 2.4,
+  "longestTrack": 2.4,
+  "numberOfTracks": 1,
+  "haveLitTracks": true,
+  "haveTracksWithFee": true,
+  "numGroomedTacks": 0,
+  "hoursSinceGrooming": 838.9997
+ },
+ "hasAdmin": true,
+ "notice": "2026-02-04\n\nAnläggningen är öppen! Vi har en slinga på ca 2,3 km med två spår och skate hela vägen. Belysning från kl 6 på morgonen. På kvällen släcker belysningen kl 21. ",
+ "publicGroomingReport": true,
+ "trackFeeBuyUrl": null,
+ "trackFeeProductId": null,
+ "electricLightingInfo": {
+  "description": "Belysningen släcks kl 21"
+ },
+ "trackFeeInfo": {
+  "description": "Anläggningen är avgiftsbelagd. Barn och ungdomar under 18 år åker gratis. Dagkort kostar 150 kr, Säsongskort kostar 1800 kr"
+ },
+ "tracks": [
+  {
+   "id": 7696,
+   "name": "",
+   "comment": "",
+   "information": "",
+   "tracklength": 2.4,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  }
+ ],
+ "images": [],
+ "trackMaps": []
+}

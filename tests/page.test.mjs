@@ -40,6 +40,11 @@ function mockWeek(offset) {
   return { week: 41 + offset, weekStart: days[0].date, today, fetchedAt: now.toISOString(), courts: FIXTURES.plain.courts, hours: Object.keys(FIXTURES.plain.slots).sort(), days };
 }
 
+// Skidspår.se facilities: Saltsjöbaden in a groomed state, the others as captured
+// off-season (2026-10-09, all statuses "unknown"); any other id answers 404.
+// Stockholms stadion (2182) is served the captured Saltsjöbaden answer, whose notice is dated 2026-02-04.
+const SKI_FIXTURES = { 1655: 'skidspar-facility-1655-groomed.json', 48: 'skidspar-facility-48.json', 18: 'skidspar-facility-18.json', 2182: 'skidspar-facility-1655.json' };
+
 let tennisMode = 'ok';
 let tennisRequests = 0;
 const server = http.createServer((req, res) => {
@@ -52,10 +57,23 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify(mockWeek(Number(url.searchParams.get('week') || 0))));
     return;
   }
+  if (url.pathname.startsWith('/ski/')) {
+    const file = SKI_FIXTURES[url.pathname.slice(5)];
+    const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+    if (!file) { res.writeHead(404, headers); res.end('{}'); return; }
+    // The groomed Saltsjöbaden answer gets today's date on its notice, so it
+    // is always fresh; the captured answers keep their real (old) dates.
+    let body = fs.readFileSync(path.join(here, 'fixtures', file), 'utf8');
+    if (file.endsWith('-groomed.json')) body = body.replace('"notice": "2026-02-04', `"notice": "${isoDate(new Date())}`);
+    res.writeHead(200, headers);
+    res.end(body);
+    return;
+  }
   if (url.pathname === '/' || url.pathname === '/index.html') {
     const port = server.address().port;
     const html = fs.readFileSync(path.join(pageDir, 'index.html'), 'utf8')
-      .replace("'https://tennis.petersandstrom.com/'", `'http://localhost:${port}/tennis/'`);
+      .replace("'https://tennis.petersandstrom.com/'", `'http://localhost:${port}/tennis/'`)
+      .replace("'https://api.skidspar.se/facility/'", `'http://localhost:${port}/ski/'`);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);
     return;
@@ -324,6 +342,96 @@ test('tapping the dots turns the card', async () => {
   await tap('.card-dots span[data-face="tennis"]');
   await sleep(300);
   assert.equal(await face(), 'tennis');
+  await tap('.card-dots span[data-face="bathing"]');
+  await sleep(300);
+  assert.equal(await face(), 'bathing');
+});
+
+const skiText = () => evaluate(`({
+  headline: document.getElementById('skiHeadline').textContent,
+  headlineClass: document.getElementById('skiHeadline').className,
+  tracks: [...document.querySelectorAll('#skiTracks .ski-track')].map(t => t.textContent.replace(/\\s+/g, ' ').trim()),
+  more: document.querySelector('#skiTracks > .ski-track-status')?.textContent || '',
+  facts: document.getElementById('skiFacts').textContent,
+  notice: document.getElementById('skiNotice').textContent,
+  status: document.getElementById('skiStatus').textContent,
+  selected: document.getElementById('skiSelect').selectedOptions[0].textContent,
+})`);
+const chooseSki = (id) => evaluate(`(() => { const s = document.getElementById('skiSelect'); s.value = '${id}'; s.dispatchEvent(new Event('change')); })()`);
+
+test('swiping left twice reaches the ski side, the third dot', async () => {
+  assert.equal(await face(), 'bathing');
+  await swipe(-0.6);
+  await swipe(-0.6);
+  assert.equal(await evaluate(`document.getElementById('faceSki').hidden`), false);
+  assert.equal(await evaluate(`document.querySelectorAll('.card-dots span').length`), 3);
+  assert.equal(await evaluate(`document.querySelector('.card-dots span.active').dataset.face`), 'ski');
+});
+
+test('ski side: Saltsjöbaden by default, groomed status and notice', async () => {
+  assert.ok(await waitFor(`/Spårat/.test(document.getElementById('skiHeadline').textContent)`), 'headline shows grooming');
+  const t = await skiText();
+  assert.equal(t.selected, 'Saltsjöbadens Skidarena');
+  assert.equal(t.headline, 'Spårat för ca 5\u00a0h sedan');
+  assert.match(t.headlineClass, /fresh/);
+  assert.equal(t.tracks.length, 1);
+  assert.match(t.tracks[0], /^Slinga 2,4 km/); // whitespace (incl. the no-break space) normalised by skiText
+  assert.match(t.tracks[0], /Klassiskt: Idag \(Riktigt bra\) · Skate: Igår \(Bra\)/);
+  assert.equal(t.facts, '2,4\u00a0km konstsnö · elljus · spåravgift');
+  assert.match(t.notice, /^\d{4}-\d{2}-\d{2}: Anläggningen är öppen! Vi har en slinga/);
+  assert.match(t.status, /^Källa: Skidspår\.se · uppdaterad \d\d:\d\d$/);
+});
+
+test('ski list: all 16 facilities, nearest to Sickla first', async () => {
+  const names = await evaluate(`[...document.getElementById('skiSelect').options].map(o => o.textContent)`);
+  assert.equal(names.length, 16);
+  assert.equal(names[0], 'Hellasgården (natursnö)');
+  assert.ok(names.includes('Saltsjöbadens Skidarena') && names.includes('Ågesta friluftsgård'));
+  assert.equal(names[names.length - 1], 'Lundåsvallen, Häverödal');
+});
+
+test('choosing Hellasgården shows its natural-snow tracks without a report', async () => {
+  await chooseSki(48);
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '48' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
+  const t = await skiText();
+  assert.equal(t.headlineClass, 'ski-headline');
+  assert.equal(t.tracks.length, 5);
+  assert.equal(t.more, '+1 spår till');
+  assert.match(t.facts, /natursnö/);
+  assert.match(t.tracks[0], /Klassiskt: –/);
+});
+
+test('the chosen facility and the ski side survive a reload', async () => {
+  await load();
+  assert.equal(await evaluate(`document.getElementById('faceSki').hidden`), false);
+  assert.ok(await waitFor(`/Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
+  assert.equal((await skiText()).selected, 'Hellasgården (natursnö)');
+});
+
+test('an operator notice older than 30 days is not shown', async () => {
+  await chooseSki(2182);
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '2182' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
+  const t = await skiText();
+  assert.equal(t.notice, '');
+  assert.equal(await evaluate(`getComputedStyle(document.getElementById('skiNotice')).display`), 'none');
+  // Undated notices are kept, dated ones within 30 days too
+  assert.equal(await evaluate(`formatSkiNotice('Spåren är öppna.')`), 'Spåren är öppna.');
+  assert.equal(await evaluate(`formatSkiNotice('2026-03-01\\n\\nNysnö!', new Date(2026, 2, 20).getTime())`), '2026-03-01: Nysnö!');
+  assert.equal(await evaluate(`formatSkiNotice('2026-03-01\\n\\nNysnö!', new Date(2026, 3, 5).getTime())`), '');
+});
+
+test('a facility that cannot be fetched shows an error', async () => {
+  await chooseSki(41); // Gärdet: no fixture, the mock answers 404
+  assert.ok(await waitFor(`/Kunde inte hämta spårstatus \\(HTTP 404\\)/.test(document.getElementById('skiHeadline').textContent)`));
+  await chooseSki(1655);
+  assert.ok(await waitFor(`/Spårat/.test(document.getElementById('skiHeadline').textContent)`));
+});
+
+test('swiping wraps around: ski → bathing → ski', async () => {
+  await swipe(-0.6);
+  assert.equal(await face(), 'bathing');
+  await swipe(0.6);
+  assert.equal(await evaluate(`document.getElementById('faceSki').hidden`), false);
   await tap('.card-dots span[data-face="bathing"]');
   await sleep(300);
   assert.equal(await face(), 'bathing');

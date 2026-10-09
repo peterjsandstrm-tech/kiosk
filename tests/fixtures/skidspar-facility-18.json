@@ -1,0 +1,293 @@
+{
+ "id": 18,
+ "name": "Ågesta friluftsgård",
+ "place": "",
+ "websites": [
+  "https://www.facebook.com/AgestaMotion"
+ ],
+ "general_description": "Konstsnöspår på 1,0, 2,1, 2,9 samt 3,9 kilometer. En slinga på runt 400 meter spåras även på ängen mellan utegymmet och parkeringen. Vid natursnö spåras golfbanan med en sträcka på upp till 8 kilometer. ",
+ "municipality": {
+  "id": 7,
+  "county": 1,
+  "name": "Huddinge",
+  "code": 126,
+  "codedname": "huddinge"
+ },
+ "coded_name": "agesta-friluftsgard",
+ "coded_path": "stockholm/huddinge/agesta-friluftsgard",
+ "description": "Stockholms stad har investerat i en konstsnöanläggning till några av skidspåren i Ågesta. Samtidigt har dessa spår breddats och kompletterats med en del nya spårdragningar så att det nu finns en 1,0-kilometers-, en 2,1-kilometers-slinga samt en 2,9-kilometersslinga med snölansar. Några av lansarna samt snökanoner kan även snöbelägga delar av det gärde som finns mellan spåren och bilparkeringen.",
+ "numLikes": 0,
+ "numSubscribers": 486,
+ "lat": 59.22269821166992,
+ "lng": 18.103300094604492,
+ "contact": "070-417 94 10",
+ "responsibleOperations": "Läktare & Evenemangsservice på uppdrag av idrottsförvaltningen i Stockholm.",
+ "routeDescription": "Från Nynäsvägen (väg 73) mot Nynäshamn: Avfart: Ågesta/Larsboda. Kör Ågesta Broväg. Kör rakt fram i fyrvägskorsningen vid Statoil bensinstation. Kör över bron. Sväng vänster i rondellen mot Vidja. Därefter två alternativ, fortsätt rakt fram till Ågesta golfklubb som har 2 stora parkeringar ELLER direkt vänster in på Bonäsvägen mot Ågesta Friluftsområde, med två parkeringar samt två extra iordningställda parkeringar (naturistbadet samt vid torpet).\r\n\r\nVill man ta sig dit kommunalt så finns buss 833 från Farsta centrum (t-bana) och Farsta strand (pendeltåg+ t-bana). Alternativ busshållplats till Ågesta är buss 742 till Rödmossevägen. Här har du bara någon minuts promenad till Ågesta golfklubb där du också kan starta din skidtur med tillgång till alla spår via golfbanespåren.\r\n\r\nÅk gärna kommunalt till Ågesta då det ofta är mycket bilar på våra parkeringar. Tänk på att inte parkera utmed Bonäsvägen. Där gäller parkeringsförbud för att bussen skall kunna ta sig hela vägen ut till Ågestagården. \r\n",
+ "trackOverview": {
+  "shortestTrack": 0.4,
+  "longestTrack": 8,
+  "numberOfTracks": 9,
+  "haveLitTracks": true,
+  "haveTracksWithFee": true,
+  "numGroomedTacks": 0,
+  "hoursSinceGrooming": 838.9997
+ },
+ "hasAdmin": true,
+ "notice": null,
+ "publicGroomingReport": true,
+ "trackFeeBuyUrl": "https://motionerawebbutik.stockholm.se/ticketshop/skidspar",
+ "trackFeeProductId": null,
+ "electricLightingInfo": {
+  "description": "Elljusbelysningen tänds kl 06 varje morgon och är tänd tills det blir ljust. Belysningen tänds sedan igen när det börjar mörkna och släcks tidigast kl 22.\r\n"
+ },
+ "restaurant": {
+  "description": "vid Ågesta Stallcafé. Kaffeservering vardagar kl 15-20, helger kl 9-16. Hembakat, hemlagat. Skylt utmed skidspåret på golfbanan bakom Ågesta Ridskolas ridhus. Skiduppställning mot altanen utanför Ågesta Stallcafé."
+ },
+ "trackFeeInfo": {
+  "description": "Ja. 50 kr per dag eller 840 kr för säsongskort."
+ },
+ "trackMaps": [],
+ "tracks": [
+  {
+   "id": 6331,
+   "name": "Konstsnöspår",
+   "comment": "",
+   "information": "",
+   "tracklength": 0.4,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": false
+   },
+   "description": "För de yngsta eller de som vill träna teknik. Kort slinga som går på ängen mellan utegymmet och parkeringen. \n",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1139,
+   "name": "Konstsnöspår",
+   "comment": "",
+   "information": "Vänstertrafik i konstsnöspåren. Hundar är tillåtna måndag-fredag kl 07-17, de ska hållas kopplade och på skejtbädden.",
+   "tracklength": 1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Flackt spår med en mindre backe i slutet ner mot målportalen.",
+   "trackmarking": {
+    "gcolor1": "#0054a6",
+    "gcolor2": "#0054a6",
+    "id": 1,
+    "name": "Blå"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 2781,
+   "name": "Konstsnöspår",
+   "comment": "",
+   "information": "Vänstertrafik i konstsnöspåren. Hundar är tillåtna måndag-fredag kl 07-17, de ska hållas kopplade och på skejtbädden.",
+   "tracklength": 2.1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Flack första kilometer, följd av stigning för ytterligare flackt parti innan spåret avslutas med en brant backe ner mot målportalen. ",
+   "trackmarking": {
+    "gcolor1": "#ed1b23",
+    "gcolor2": "#ed1b23",
+    "id": 28,
+    "name": "Röd"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8385,
+   "name": "Konstsnöspår",
+   "comment": "",
+   "information": "Vänstertrafik i konstsnöspåren. Hundar är tillåtna måndag-fredag kl 07-17, de ska hållas kopplade och på skejtbädden. ",
+   "tracklength": 2.9,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Flack första kilometer, följd av stigning för ytterligare flackt parti innan spåret avslutas med en brant backe ner mot målportalen. Tillkom säsongen 2024/25. ",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8517,
+   "name": "Konstsnöspår",
+   "comment": "",
+   "information": "",
+   "tracklength": 3.9,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1140,
+   "name": "Motionsspår",
+   "comment": "",
+   "information": "",
+   "tracklength": 3.3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": true
+   },
+   "description": "Relativt kuperat. Spåras vid minst 15 cm natursnö. Börjar och slutar på konstsnöspåret.",
+   "trackmarking": {
+    "gcolor1": "#ed1b23",
+    "gcolor2": "#ffffff",
+    "id": 32,
+    "name": "Rödvit"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1141,
+   "name": "Motionsspår",
+   "comment": "",
+   "information": "\r\n",
+   "tracklength": 6,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": true
+   },
+   "description": "Relativt kuperat. Spåras vid minst 15 cm natursnö. Går delvis på konstsnöspåret. ",
+   "trackmarking": {
+    "gcolor1": "#00a633",
+    "gcolor2": "#ffffff",
+    "id": 14,
+    "name": "Grönvit"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1137,
+   "name": "Golfbanan",
+   "comment": "",
+   "information": "Högertrafik. Från Ågesta går detta spår ut via Skogsspåren (säsong 2024/25) eftersom golfbanan byggts om.",
+   "tracklength": 5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Dubbelspår med bred skejtgata i mitten. Går på golfbanan. Relativt flackt med en del stigningar och mindre backar. ",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1138,
+   "name": "Golfbanan",
+   "comment": "",
+   "information": " Högertrafik. Från Ågesta går detta spår ut via Skogsspåren (säsong 2024/25) eftersom golfbanan byggts om.",
+   "tracklength": 8,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Dubbelspår med bred skejtbädd i mitten. Går på golfbanan. Relativt flackt med en del stigningar och mindre backar. ",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  }
+ ],
+ "images": []
+}

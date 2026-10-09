@@ -225,6 +225,48 @@
     color: var(--muted);
     text-align: center;
   }
+  /* Skidspår: en vald anläggning från Skidspår.se */
+  .ski-title { display: flex; align-items: center; gap: 4px; max-width: 100%; }
+  .ski-select { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: inherit; }
+  .ski-headline {
+    margin: 12px 0 8px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    background: rgba(255,255,255,0.08);
+    color: var(--muted);
+  }
+  .ski-headline.fresh { background: rgba(52, 199, 89, 0.22); color: #7CFC93; }
+  .ski-headline.old { background: rgba(255, 209, 102, 0.18); color: var(--accent); }
+  .ski-tracks {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+  .ski-track-name { font-weight: 600; }
+  .ski-track-status { color: var(--muted); font-size: 0.72rem; }
+  .ski-facts {
+    width: 100%;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .ski-notice {
+    width: 100%;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .ski-notice:empty, .ski-facts:empty { display: none; }
   .bathing-title {
     font-size: 0.8rem;
     color: var(--muted);
@@ -756,7 +798,15 @@
         </div>
         <div class="tennis-status" id="tennisStatus"></div>
       </div>
-      <div class="card-dots" aria-hidden="true"><span data-face="bathing"></span><span data-face="tennis"></span></div>
+      <div class="card-face" id="faceSki" hidden>
+        <div class="bathing-title ski-title">⛷️ <select class="stop-select ski-select" id="skiSelect" aria-label="Välj skidspår"></select></div>
+        <div class="ski-headline" id="skiHeadline">Hämtar spårstatus…</div>
+        <div class="ski-tracks" id="skiTracks"></div>
+        <div class="ski-facts" id="skiFacts"></div>
+        <div class="ski-notice" id="skiNotice"></div>
+        <div class="tennis-status" id="skiStatus"></div>
+      </div>
+      <div class="card-dots" aria-hidden="true"><span data-face="bathing"></span><span data-face="tennis"></span><span data-face="ski"></span></div>
     </div>
   </div>
 
@@ -782,7 +832,7 @@
     <div class="bo-list" id="bathingOverlayList"></div>
   </div>
 
-  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se · Radar: MET Norway · Tennis: Sicklasjöns BK (commodusnet.net)</div>
+  <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se · Radar: MET Norway · Tennis: Sicklasjöns BK (commodusnet.net) · Skidspår: Skidspår.se</div>
   <div class="footer-note">Skapad av Sandstream · <span id="appVersion"></span></div>
 </div>
 
@@ -795,7 +845,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.6.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1459,9 +1509,13 @@ const CARD_FACE_STORAGE_KEY = 'kiosk-sickla-card-face';
 const SWIPE_MIN_PX = 40;
 const WEEKDAYS_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
 
+// Sidorna i ordning: svep åt vänster går framåt, åt höger bakåt (runt)
+const CARD_FACES = ['bathing', 'tennis', 'ski'];
+const CARD_FACE_ELEMENTS = { bathing: 'faceBathing', tennis: 'faceTennis', ski: 'faceSki' };
 let cardFace = 'bathing';
 try {
-  if (localStorage.getItem(CARD_FACE_STORAGE_KEY) === 'tennis') cardFace = 'tennis';
+  const savedFace = localStorage.getItem(CARD_FACE_STORAGE_KEY);
+  if (CARD_FACES.includes(savedFace)) cardFace = savedFace;
 } catch (e) { /* utan lagring visas badsidan */ }
 let suppressCardClick = false;
 let tennisWeek = 0; // 0 = denna vecka, 1 = nästa
@@ -1556,12 +1610,12 @@ function showCardFace(face, animate) {
   cardFace = face;
   try { localStorage.setItem(CARD_FACE_STORAGE_KEY, face); } catch (e) { /* ignoreras */ }
   const apply = () => {
-    document.getElementById('faceBathing').hidden = face !== 'bathing';
-    document.getElementById('faceTennis').hidden = face !== 'tennis';
+    for (const f of CARD_FACES) document.getElementById(CARD_FACE_ELEMENTS[f]).hidden = f !== face;
     card.querySelectorAll('.card-dots span').forEach(dot => {
       dot.classList.toggle('active', dot.dataset.face === face);
     });
     if (face === 'tennis') tennisTick();
+    if (face === 'ski') skiTick();
   };
   if (!animate) { apply(); return; }
   card.classList.remove('flipping');
@@ -1584,7 +1638,9 @@ function showCardFace(face, animate) {
     if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < 1.5 * Math.abs(dy)) return;
     suppressCardClick = true;
     setTimeout(() => { suppressCardClick = false; }, 400);
-    showCardFace(cardFace === 'bathing' ? 'tennis' : 'bathing', true);
+    const step = dx < 0 ? 1 : -1;
+    const next = CARD_FACES[(CARD_FACES.indexOf(cardFace) + step + CARD_FACES.length) % CARD_FACES.length];
+    showCardFace(next, true);
   });
   card.querySelectorAll('.card-dots span').forEach(dot => {
     dot.addEventListener('click', (e) => {
@@ -1602,9 +1658,204 @@ function showCardFace(face, animate) {
   });
 })();
 
+// ---------- Skidspår: spårstatus från Skidspår.se ----------
+// Tredje sidan av badvattenrutan. Man väljer en anläggning i listan (sparas på
+// plattan) och ser när spåren senast preparerades, besökarnas omdöme och
+// arrangörens notis. Data från Skidspår.se:s öppna API (samma som deras
+// webbapp använder; ingen nyckel, CORS tillåtet). Odokumenterat, så vi frågar
+// sällan: var 30:e minut och bara medan sidan visas.
+const SKI_API_URL = 'https://api.skidspar.se/facility/';
+const SKI_REFRESH_MS = 30 * 60 * 1000;
+const SKI_RETRY_MS = 5 * 60 * 1000;
+const SKI_STORAGE_KEY = 'kiosk-sickla-ski-facility';
+const SKI_DEFAULT_ID = 1655; // Saltsjöbadens Skidarena
+// Stockholms läns konstsnöanläggningar på Skidspår.se (2026-10-09) plus
+// Hellasgården, som bara har natursnö. Sorteras efter avstånd från Sickla.
+const SKI_FACILITIES = [
+  { id: 1655, name: 'Saltsjöbadens Skidarena', lat: 59.283, lng: 18.270 },
+  { id: 48, name: 'Hellasgården (natursnö)', lat: 59.290, lng: 18.159 },
+  { id: 18, name: 'Ågesta friluftsgård', lat: 59.223, lng: 18.103 },
+  { id: 41, name: 'Gärdets sportfält', lat: 59.342, lng: 18.108 },
+  { id: 2182, name: 'Stockholms stadion', lat: 59.345, lng: 18.079 },
+  { id: 22, name: 'Rudans friluftsgård', lat: 59.165, lng: 18.130 },
+  { id: 21, name: 'Lida friluftsgård', lat: 59.163, lng: 17.880 },
+  { id: 51, name: 'Ursviks motionsområde', lat: 59.388, lng: 17.987 },
+  { id: 5118, name: 'Sundbybergs konstsnöspår', lat: 59.388, lng: 17.961 },
+  { id: 2396, name: 'Ekebyhovs konstsnöspår', lat: 59.281, lng: 17.832 },
+  { id: 1513, name: 'Täby konstsnöspår', lat: 59.485, lng: 18.125 },
+  { id: 5127, name: 'Bruket, Järfälla', lat: 59.433, lng: 17.779 },
+  { id: 2556, name: 'Bisslinge konstsnöspår', lat: 59.481, lng: 17.876 },
+  { id: 5117, name: 'Skånela konstsnöspår', lat: 59.588, lng: 17.942 },
+  { id: 1932, name: 'Bro Bålsta konstsnöspår', lat: 59.519, lng: 17.590 },
+  { id: 59, name: 'Lundåsvallen, Häverödal', lat: 60.024, lng: 18.602 },
+].sort((a, b) => skiDistance(a) - skiDistance(b));
+
+function skiDistance(f) {
+  const dLat = f.lat - SICKLA_LAT;
+  const dLng = (f.lng - SICKLA_LON) * Math.cos(SICKLA_LAT * Math.PI / 180);
+  return Math.hypot(dLat, dLng);
+}
+
+// Skidspår.se:s egna ord för preparering och omdöme
+const SKI_GROOMED_LABELS = { justnow: 'Nyspårat', today: 'Idag', '1day': 'Igår', '2days': '2 dagar sedan', '4days': '4+ dagar sedan', '7days': '7+ dagar sedan' };
+const SKI_GROOMED_ORDER = ['justnow', 'today', '1day', '2days', '4days', '7days'];
+const SKI_QUALITY_LABELS = { 0.5: 'Inte bra', 1: 'Dåligt', 1.5: 'Ganska dåligt', 2: 'Sådär', 2.5: 'Helt okej', 3: 'Ganska bra', 3.5: 'Bra', 4: 'Riktigt bra', 4.5: 'Perfekt', 5: 'Kan inte bli bättre' };
+
+let skiFacilityId = SKI_DEFAULT_ID;
+try {
+  const saved = Number(localStorage.getItem(SKI_STORAGE_KEY));
+  if (SKI_FACILITIES.some(f => f.id === saved)) skiFacilityId = saved;
+} catch (e) { /* utan lagring visas Saltsjöbaden */ }
+const skiState = {}; // per anläggning: { data, fetchedAt, attemptAt, error, loading }
+
+async function loadSki(id) {
+  const state = skiState[id] || (skiState[id] = { data: null, fetchedAt: 0, attemptAt: 0, error: null, loading: false });
+  if (state.loading) return;
+  state.loading = true;
+  state.attemptAt = Date.now();
+  try {
+    const res = await fetchWithTimeout(`${SKI_API_URL}${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data.tracks)) throw new Error('oväntat svar');
+    state.data = data;
+    state.fetchedAt = Date.now();
+    state.error = null;
+  } catch (e) {
+    state.error = e.message; // senaste lyckade svaret ligger kvar
+  } finally {
+    state.loading = false;
+  }
+  if (id === skiFacilityId && cardFace === 'ski') renderSki();
+}
+
+function skiTick() {
+  if (cardFace !== 'ski' || document.hidden) return;
+  const state = skiState[skiFacilityId];
+  const wait = !state ? 0 : state.error ? SKI_RETRY_MS : SKI_REFRESH_MS;
+  if (!state || Date.now() - state.attemptAt >= wait) loadSki(skiFacilityId);
+  renderSki();
+}
+
+// Spåren som visas: konstsnöspåren om anläggningen har några, annars alla
+function skiShownTracks(data) {
+  const active = data.tracks.filter(t => t.isActive !== false);
+  const artificial = active.filter(t => t.properties?.isartificialsnow);
+  return artificial.length ? artificial : active;
+}
+
+// Rubriken: hur länge sedan något av spåren preparerades
+function skiHeadline(tracks) {
+  const ages = tracks.flatMap(t => [t.status?.ageHoursOfClassicGrooming, t.status?.ageHoursOfSkateGrooming])
+    .filter(a => typeof a === 'number' && a >= 0);
+  if (ages.length) {
+    const h = Math.min(...ages);
+    if (h < 1) return { text: 'Nyspårat', cls: 'fresh' };
+    if (h < 48) return { text: `Spårat för ca ${Math.round(h)}\u00a0h sedan`, cls: 'fresh' };
+    if (h < 168) return { text: `Spårat för ${Math.floor(h / 24)}\u00a0dagar sedan`, cls: 'old' };
+    return { text: 'Senast spårat för över en vecka sedan', cls: '' };
+  }
+  const codes = tracks.flatMap(t => [t.status?.lastGroomedClassic, t.status?.lastGroomedSkate]);
+  const best = SKI_GROOMED_ORDER.find(c => codes.includes(c));
+  if (!best) return { text: 'Ingen aktuell spårrapport', cls: '' };
+  const fresh = ['justnow', 'today', '1day'].includes(best);
+  return { text: best === 'justnow' ? 'Nyspårat' : `Spårat ${SKI_GROOMED_LABELS[best].toLowerCase()}`, cls: fresh ? 'fresh' : 'old' };
+}
+
+function skiTrackStatus(track) {
+  const st = track.status || {};
+  const part = (label, code, quality) => {
+    const groomed = SKI_GROOMED_LABELS[code] || '–';
+    const q = SKI_QUALITY_LABELS[quality];
+    return `${label}: ${groomed}${q ? ` (${q})` : ''}`;
+  };
+  const parts = [];
+  if (track.properties?.hastracksforclassic) parts.push(part('Klassiskt', st.lastGroomedClassic, st.classicQuality));
+  if (track.properties?.hastracksforskate) parts.push(part('Skate', st.lastGroomedSkate, st.skateQuality));
+  return parts.join(' · ');
+}
+
+// Skidspår.se har en enda notis per anläggning (en ny ersätter den gamla).
+// Den börjar ofta med ett datum på egen rad följt av tomrader:
+// "2026-02-04\n\nAnläggningen är öppen! …" blir "2026-02-04: Anläggningen är öppen! …".
+// En notis daterad för mer än 30 dagar sedan visas inte; en odaterad visas.
+const SKI_NOTICE_MAX_AGE_DAYS = 30;
+function formatSkiNotice(notice, now = Date.now()) {
+  const text = (notice || '').replace(/\s+/g, ' ').trim();
+  const dated = text.match(/^(\d{4})-(\d{2})-(\d{2})\b/);
+  if (dated) {
+    const noticeDate = new Date(Number(dated[1]), Number(dated[2]) - 1, Number(dated[3]));
+    if ((now - noticeDate) / 86400000 > SKI_NOTICE_MAX_AGE_DAYS) return '';
+  }
+  return text.replace(/^(\d{4}-\d{2}-\d{2}) (?!:)/, '$1: ');
+}
+
+function formatKm(km) {
+  return `${String(Math.round(km * 10) / 10).replace('.', ',')}\u00a0km`;
+}
+
+function renderSki() {
+  const headlineEl = document.getElementById('skiHeadline');
+  const tracksEl = document.getElementById('skiTracks');
+  const factsEl = document.getElementById('skiFacts');
+  const noticeEl = document.getElementById('skiNotice');
+  const statusEl = document.getElementById('skiStatus');
+  const state = skiState[skiFacilityId];
+  const data = state?.data;
+  if (!data) {
+    headlineEl.className = 'ski-headline';
+    headlineEl.textContent = state?.error ? `Kunde inte hämta spårstatus (${state.error})` : 'Hämtar spårstatus…';
+    tracksEl.innerHTML = factsEl.textContent = noticeEl.textContent = statusEl.textContent = '';
+    return;
+  }
+
+  const tracks = skiShownTracks(data);
+  const headline = skiHeadline(tracks);
+  headlineEl.className = `ski-headline ${headline.cls}`.trim();
+  headlineEl.textContent = headline.text;
+
+  const MAX_TRACKS = 5;
+  tracksEl.innerHTML = tracks.slice(0, MAX_TRACKS).map(t => `
+    <div class="ski-track">
+      <div class="ski-track-name">${escapeHtml(t.name || 'Slinga')} ${formatKm(t.tracklength || 0)}</div>
+      <div class="ski-track-status">${escapeHtml(skiTrackStatus(t))}</div>
+    </div>`).join('') + (tracks.length > MAX_TRACKS ? `<div class="ski-track-status">+${tracks.length - MAX_TRACKS} spår till</div>` : '');
+
+  const artificial = tracks.some(t => t.properties?.isartificialsnow);
+  const totalKm = tracks.reduce((sum, t) => sum + (t.tracklength || 0), 0);
+  const facts = [`${formatKm(totalKm)} ${artificial ? 'konstsnö' : 'natursnö'}`];
+  if (tracks.some(t => t.properties?.islit)) facts.push('elljus');
+  if (tracks.some(t => t.properties?.hastrackfee)) facts.push('spåravgift');
+  factsEl.textContent = facts.join(' · ');
+
+  noticeEl.textContent = formatSkiNotice(data.notice);
+
+  const updated = new Date(state.fetchedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  let status = `Källa: Skidspår.se · uppdaterad ${updated}`;
+  if (state.error) status += ` · ⚠ kunde inte uppdatera (${state.error})`;
+  statusEl.textContent = status;
+}
+
+(function setupSkiSelect() {
+  const select = document.getElementById('skiSelect');
+  select.innerHTML = SKI_FACILITIES.map(f => `<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
+  select.value = String(skiFacilityId);
+  select.addEventListener('click', (e) => e.stopPropagation());
+  select.addEventListener('change', () => {
+    skiFacilityId = Number(select.value);
+    try { localStorage.setItem(SKI_STORAGE_KEY, String(skiFacilityId)); } catch (e) { /* ignoreras */ }
+    fitStopSelectWidth(select);
+    renderSki();
+    skiTick();
+  });
+})();
+
 showCardFace(cardFace, false);
+fitStopSelectWidth(document.getElementById('skiSelect'));
 setInterval(tennisTick, 60 * 1000);
+setInterval(skiTick, 60 * 1000);
 document.addEventListener('visibilitychange', tennisTick);
+document.addEventListener('visibilitychange', skiTick);
 
 // ---------- Robust fetch: försök direkt, falla tillbaka på CORS-proxy ----------
 // Om sidan öppnas som en lokal fil (file://) skickar webbläsaren "Origin: null",

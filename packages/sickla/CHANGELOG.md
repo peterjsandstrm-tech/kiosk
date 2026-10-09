@@ -4,6 +4,26 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.6.0 — 2026-10-09
+
+### Added
+- A third side on the bathing-water card: ski-track status from Skidspår.se. Swipe left
+  from the tennis side (the card now turns bathing → tennis → ski tracks → bathing; swipe
+  right goes back) or tap the third dot.
+- A list like the stop picker chooses the facility: all artificial-snow tracks in Stockholm
+  County listed on Skidspår.se plus Hellasgården (natural snow), nearest to Sickla first;
+  Saltsjöbadens Skidarena by default. The choice is remembered on the tablet.
+- For the chosen facility: a headline with how long ago a track was groomed (green within
+  2 days, yellow up to a week, grey without a report), each track with length, when it
+  was groomed for classic and skate and the visitors' rating in Skidspår.se's words, a
+  line with total length, snow type, lighting and track fee, and the operator's notice
+  (Skidspår.se keeps one notice per facility; a notice dated more than 30 days ago is
+  not shown, an undated one is).
+- Data from Skidspår.se's open API (`api.skidspar.se`, no key, CORS allowed; the same API
+  their web app uses, undocumented), fetched only while the ski side is shown, every
+  30 minutes (after an error, after 5 minutes; the last good data stays).
+- Tests for the ski side, with saved Skidspår.se answers in `tests/fixtures/`.
+
 ## 1.5.1 — 2026-10-09
 
 ### Changed

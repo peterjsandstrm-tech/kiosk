@@ -1,0 +1,215 @@
+{
+ "id": 48,
+ "name": "Hellasgården",
+ "place": "",
+ "websites": [
+  "http://www.jarla.com/jarla_ny/spar.asp\r\n"
+ ],
+ "general_description": "På vintersäsongen kör Järla upp skidspår på ängarna mellan Källtorpssjön och\r\nÄltavägen samt på elljusbanan. \r\n\r\nSpårlängden på \"ängsspåret\" = 5,7 km.\r\nElljusspåret = 2,3 km. Klassiska spår. \r\n\r\nHellasgården kör upp spår på den så kallade grusfemman (5-km-spåret)söder om\r\nHellasgården med anslutningar till Brotorp och Björkhagen. Det finns alltså möjlighet att få ett varv på ca 14 km. (Elljusspåret - ängsspåret - till och\r\nfrån och runt 5km-spåret)\r\n\r\nVid sämre snötillgång är ett alternativ en avkortad version på enbart det större Stengärdet, ca 2,5 km.\r\n \r\nDet finns möjlighet att få ihop 18,4 km klassiska spår om man lägger in även anslutningen ner till Brotorp.\r\n \r\nLägger man därtill Nackaspåren/Björkhagen blir det totalt 27,2 km preparerade klassiska spår.\r\n",
+ "municipality": {
+  "id": 19,
+  "county": 1,
+  "name": "Nacka",
+  "code": 182,
+  "codedname": "nacka"
+ },
+ "coded_name": "hellasgarden",
+ "coded_path": "stockholm/nacka/hellasgarden",
+ "description": "Järlaspåren nordväst om Hellasgården\r\n1,2 km     Skatespår\t\t\r\n2,2 km     Järlaspåret /fd.Elljusspåret                               Anslutningsspår Hellasgården 0,5+0.5 km tillkommer.\r\n5,7 km     Ängsspåret\r\n\r\nSöder om Hellasgården start vid Tennisbanorna/Grusparkeringen\r\n1,3 km    Barnskidspåret , ligger söder om Ältavägen och söder om Grusparkeringen.\r\n5,0 km    Gula femman/Grusfemman       \t\r\nAnslutning till Brotorp 2,4 km från korsningen vid Kvarnhagen.                               \r\n\r\n",
+ "numLikes": 0,
+ "numSubscribers": 159,
+ "lat": 59.28990173339844,
+ "lng": 18.159099578857422,
+ "contact": "08-716 60 26 (Hellasgården)",
+ "responsibleOperations": "Järla IF OK/Hellasgården",
+ "routeDescription": "10 minuter från Gullmarsplan. Du åker mot Älta, på väg 260, förbi Sickla.\r\n25 minuter med buss 401 från Slussen.\r\n",
+ "trackOverview": {
+  "shortestTrack": 1.2,
+  "longestTrack": 8.8,
+  "numberOfTracks": 6,
+  "haveLitTracks": false,
+  "haveTracksWithFee": false,
+  "numGroomedTacks": 0,
+  "hoursSinceGrooming": 838.9997
+ },
+ "hasAdmin": true,
+ "notice": null,
+ "publicGroomingReport": true,
+ "trackFeeBuyUrl": null,
+ "trackFeeProductId": null,
+ "electricLightingInfo": {
+  "description": "Samtliga spår släcks kl. 22.00."
+ },
+ "changingRoom": {
+  "description": "Bastu och omklädnad på Hellasgården, mot avgift.\r\n"
+ },
+ "restaurant": {
+  "description": "Hellasgården Storstugan Restaurang.\r\nCafé vid Bastun.\r\n"
+ },
+ "trackFeeInfo": {
+  "description": "Nacka kommun ger från och med 2007 ett ekonomiskt stöd till Järlas direkta\r\nkostnader för spåren men allt arbete med spåren utförs ideellt av\r\nklubbmedlemmar. <br> <br> Om Du tycker att det är bra hoppas Järla att Du vill ge ett\r\nbidrag till spåren. Sätt in valfritt belopp på postgiro 494446-8 och ange\r\n\"Skidspår\"."
+ },
+ "parking": {
+  "description": "Stor bilparkering, plats för 600 bilar. Billig avgift.\r\n"
+ },
+ "trackMaps": [],
+ "tracks": [
+  {
+   "id": 7399,
+   "name": "Barnskidspåret",
+   "comment": "",
+   "information": "Ligger söder om Ältavägen och söder om Grusparkeringen. \r\n\t\t\r\n",
+   "tracklength": 1.3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Lättåkt",
+   "trackmarking": {
+    "gcolor1": "#ed1b23",
+    "gcolor2": "#ed1b23",
+    "id": 28,
+    "name": "Röd"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1156,
+   "name": "Gula femman/ Grusfemman",
+   "comment": "",
+   "information": "Anslutning till Brotorp 2,4 km från korsningen vid Kvarnhagen.                             ",
+   "tracklength": 5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "",
+   "trackmarking": {
+    "gcolor1": "#ffc000",
+    "gcolor2": "#ffc000",
+    "id": 19,
+    "name": "Gul"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8154,
+   "name": "Järlaspåret",
+   "comment": "",
+   "information": "",
+   "tracklength": 2.2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Lättåkt.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 1154,
+   "name": "Ängsspåret",
+   "comment": "",
+   "information": "Ligger NV om Hellasgården i anslutning till Järlaspåret.                     \r\n",
+   "tracklength": 5.7,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Lättåkt.  ",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 3975,
+   "name": "Nackaspåret",
+   "comment": "",
+   "information": "8,8 km   Nackaspåren.\r\nAnläggning Björkhagen/Kärrtorp\t\r\n\r\nAnslutning från Järlaspåret/Elljusspåret till Björkhagsspåret gångväg 0,8 km. \r\n                                                                             \tBjörkhagsspåret 3,0 km\r\n\t\r\nHammarbyrundan inklusive anslutning 2,0 km\r\n\t\r\nKärrtorpsspåret 2,6 km\r\n\t\r\nSumma: Ett varv blir totalt 8,8 km\r\n\tSpåras av Stockholmstad / Läktarservice",
+   "tracklength": 8.8,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8153,
+   "name": "Skatespår",
+   "comment": "",
+   "information": "Ligger i anslutning till Ängsspåret. NV Hellasgården.\r\nAnslutningsspår Hellasgården 0,5+0.5 km tillkommer.",
+   "tracklength": 1.2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": false,
+    "hastracksforclassic": false,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Lättåkt.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  }
+ ],
+ "images": []
+}

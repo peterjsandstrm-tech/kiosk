@@ -4,7 +4,7 @@ Monorepo for wall-mounted kiosk info-board pages. Each location lives under `pac
 
 ## Packages
 
-- [`packages/sickla`](packages/sickla/) — Sickla stop info board (VMA public alerts, date/time, weather, precipitation radar, weather warnings, bathing-water quality at Sickla strandbad, tennis-court booking status, next departures)
+- [`packages/sickla`](packages/sickla/) — Sickla stop info board (VMA public alerts, date/time, weather, precipitation radar, weather warnings, bathing-water quality at Sickla strandbad, tennis-court booking status, ski-track status, next departures)
 
 ## Tests
 
