@@ -1,0 +1,857 @@
+{
+ "id": 495,
+ "name": "Orsa Grönklitt",
+ "place": "Grönklitt",
+ "websites": [
+  "https://www.orsagronklitt.se/"
+ ],
+ "general_description": "Elljusspåret är försett med snökanoner vilket gör att vi får en tidig snöpremiär. Vi sparar även snö över sommaren för att erbjuda 6 km tidig skidåkning på hösten.",
+ "municipality": {
+  "id": 227,
+  "county": 20,
+  "name": "Orsa",
+  "code": 2034,
+  "codedname": "orsa"
+ },
+ "coded_name": "orsa-gronklitt",
+ "coded_path": "dalarna/orsa/orsa-gronklitt",
+ "description": "Orsa Grönklitt är vida känt för sina 145 km välpreparerade skidspår och goda snötillgången. Våra skidspår körs upp dagligen för klassiskt och skate.\nLängdskidåkning är inte bara en sport – det är en passion, en livsstil. För oss på Orsa Grönklitt har skidspåren varit en del av vår själ och vår vardag i generationer. Det är inte bara en anläggning, det är en plats där hjärtat av längdåkning bultar. Här finns något för alla - såväl nybörjare som motionär och elit. \nHundar endast tillåten på Hund & Pulkaspåret, Stugspåret, Utsiktsspåret, Fryksås t.o.r och Transportspåret.",
+ "numLikes": 0,
+ "numSubscribers": 125,
+ "lat": 61.211299896240234,
+ "lng": 14.531000137329102,
+ "contact": "0250-462 06",
+ "responsibleOperations": "Orsa Grönklitt Friluftsanläggning AB",
+ "routeDescription": "Ta av in mot Orsa centrum från riksväg 45. Skyltat från Orsa centrum.",
+ "trackOverview": {
+  "shortestTrack": 1,
+  "longestTrack": 39,
+  "numberOfTracks": 31,
+  "haveLitTracks": true,
+  "haveTracksWithFee": true,
+  "numGroomedTacks": 0,
+  "hoursSinceGrooming": 838.9997
+ },
+ "hasAdmin": true,
+ "notice": "Orsa Grönklitt är längdskidåkning mer än en aktivitet – det är en passion. Vi startar upp vintersäsongen den 24 oktober och beroende på vädret och kylan så återkommer vi om hur långt spår vi öppnar. Vi har sparat mer snö till kommande vinter och vi har sparad snö till 6 km och då runt Multibanan. Våra spår prepareras med omsorg av ett team som lever och andas skidåkning. Med upp till 145 km välskötta spår, varierad terräng och snösäker säsong är det här platsen där både motionärer och elitåkare trivs. ",
+ "publicGroomingReport": false,
+ "trackFeeBuyUrl": "https://shop.orsagronklitt.se/sv/Products/Tickets/",
+ "trackFeeProductId": null,
+ "electricLightingInfo": {
+  "description": "Belysningen är tänd till 21.00."
+ },
+ "changingRoom": {
+  "description": "JA"
+ },
+ "restaurant": {
+  "description": "JA"
+ },
+ "waxingShed": {
+  "description": "JA"
+ },
+ "webcam": {
+  "description": "https://www.orsagronklitt.se/paa-plats/webbkamera"
+ },
+ "trackFeeInfo": {
+  "description": "Köp spårkort via länken nedan\n"
+ },
+ "parking": {
+  "description": "Det finns flera stora parkeringar på området."
+ },
+ "trackMaps": [
+  "https://www.orsagronklitt.se/skidaakning/laengdaakning"
+ ],
+ "tracks": [
+  {
+   "id": 7329,
+   "name": "Elitspåret, nr 1",
+   "comment": "",
+   "information": "",
+   "tracklength": 1.5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Varierande terräng.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8567,
+   "name": "Elitspåret, nr 2",
+   "comment": "",
+   "information": "",
+   "tracklength": 2.5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Varierande terräng.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7614,
+   "name": "Elitspåret, nr 3",
+   "comment": "",
+   "information": "",
+   "tracklength": 3.3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Tuff terräng, elitspåren går delvis på samma sträcka.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8568,
+   "name": "Elitspåret, nr 4",
+   "comment": "",
+   "information": "",
+   "tracklength": 3.75,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 291,
+   "name": "Elitspåret, nr 5",
+   "comment": "",
+   "information": "",
+   "tracklength": 5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Tuff terräng för den vana åkaren.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 292,
+   "name": "Elitspåret, nr 6",
+   "comment": "",
+   "information": "",
+   "tracklength": 10,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Vårt tuffaste spår med många backar för den vana åkaren.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 3,
+    "lastGroomedClassic": "1day",
+    "lastGroomedSkate": "1day",
+    "skateQuality": 0,
+    "ageHoursOfClassicGrooming": 30,
+    "ageHoursOfSkateGrooming": 30
+   }
+  },
+  {
+   "id": 8434,
+   "name": "Blåbärsslingan (Skidstadion), nr 7",
+   "comment": "",
+   "information": "",
+   "tracklength": 1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Vi har totalt 2 st Bärraspår. En på östra sidan och en på västra sidan.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8277,
+   "name": "Fryksås t.o.r, nr 8",
+   "comment": "",
+   "information": "",
+   "tracklength": 4,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Småkuperat.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7143,
+   "name": "Nallerundan, nr 9",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fin skidåkning genom större skog.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8275,
+   "name": "Toppstugan t.o.r, nr 10",
+   "comment": "",
+   "information": "Vacker utsikt.",
+   "tracklength": 4,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fysiskt krävande med viss tekniskt svårighet utför.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 3760,
+   "name": "Multibanan, nr 11",
+   "comment": "",
+   "information": "",
+   "tracklength": 5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Varierande terräng. ",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 288,
+   "name": "Hund & Pulkaspåret, nr 12",
+   "comment": "",
+   "information": "",
+   "tracklength": 6,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": true,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": true
+   },
+   "description": "Ett enklare spår med fina omgivningar. I Hund & Pulkaspåret är det tillåtet att åka med hund i draglina/koppel.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8276,
+   "name": "Gröna milen, nr 13",
+   "comment": "",
+   "information": "",
+   "tracklength": 10,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fin varierande skidåkning med småkuperad terräng.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7141,
+   "name": "Böllingmyren, nr 14",
+   "comment": "",
+   "information": "Ett av våra vackraste spår.",
+   "tracklength": 11,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Lättåkt. Ett helt slätt och kurvigt spår i otroligt naturskön miljö.\r\n",
+   "geometry": null,
+   "status": {
+    "classicQuality": 4,
+    "lastGroomedClassic": "today",
+    "lastGroomedSkate": "today",
+    "skateQuality": 3.5,
+    "ageHoursOfClassicGrooming": 3,
+    "ageHoursOfSkateGrooming": 3
+   }
+  },
+  {
+   "id": 8570,
+   "name": "Blåbärsmyren, nr 15",
+   "comment": "",
+   "information": "",
+   "tracklength": 3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fin skidåkning på en mindre myr.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7142,
+   "name": "Stormon runt, nr 16",
+   "comment": "",
+   "information": "",
+   "tracklength": 10,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fin skidåkning med fina slakmotor.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 6807,
+   "name": "Kallbolsmyren, nr 17",
+   "comment": "",
+   "information": "",
+   "tracklength": 16,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Fin skidåkning med lätt terräng och mestadels på stora myrar.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8569,
+   "name": "Berget runt, nr 18",
+   "comment": "",
+   "information": "",
+   "tracklength": 11,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Åk skidor runt Grönklittsberget. Varierad terräng med en häftig uppförsbacke på baksidan med 140 höjdmeter på 1 km.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 5450,
+   "name": "Vägspåren, nr 19",
+   "comment": "",
+   "information": "Följer vägarna. Åkriktningen är vänstervarv. ",
+   "tracklength": 39,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Flackt och lättåkt.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "2days",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0,
+    "ageHoursOfClassicGrooming": 50
+   }
+  },
+  {
+   "id": 8572,
+   "name": "Böllingsticket t.o.r, nr 20",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ingår i Vägspåren. Du kan ansluta till Böllingmyren via detta stick.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8573,
+   "name": "Stormonsticket t.o.r, nr 21",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ingår i Vägspåren. Du kan ansluta till kallbolsmyren via detta stick.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8575,
+   "name": "Pumphussticket t.o.r, nr 22",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ingår i Vägspåren.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8576,
+   "name": "Elitsticket t.o.r, nr 23",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ingår i Vägspåren.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8574,
+   "name": "Kallbolsrundan, nr 24",
+   "comment": "",
+   "information": "",
+   "tracklength": 3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Varierad terräng längst norrut i vårt spårsystem. Ingår delvis i vårt Vägspår.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8428,
+   "name": "Transportspåret t.o.r, nr 25",
+   "comment": "",
+   "information": "",
+   "tracklength": 2,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": true,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Med Transportspåret tar du dig mellan Öst och Västsidan i vårt spårsystem och här är det tillåtet att åka med hund i draglina/koppel i detta spår.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 6934,
+   "name": "Utsiktsspåret, nr 26",
+   "comment": "",
+   "information": "",
+   "tracklength": 7,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": true,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Omväxlande traditionell skidåkning med fina slakmotor och roliga utförsbackar i ett varierande skogslandskap med fina vyer i flera väderstreck. Utsiktsspåret är tillåten att åka med hund i draglina/koppel.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 6933,
+   "name": "Stugspåret, nr 27",
+   "comment": "",
+   "information": "",
+   "tracklength": 3,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": true,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ett kuperat spår som förbinder stugbyarna. Stugspåret är tillåtet att åka med hund i draglina/koppel.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8427,
+   "name": "Tranbärssticket t.o.r, nr 28",
+   "comment": "",
+   "information": "",
+   "tracklength": 1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Ett spår längs med vägen upp till Toppstugan.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8426,
+   "name": "Råtjärnssticket t.o.r, nr 29",
+   "comment": "",
+   "information": "",
+   "tracklength": 1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "En fin skidtur längs med Råtjärn.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8571,
+   "name": "Blåbärsrundan (Råtjärn), nr 30",
+   "comment": "",
+   "information": "",
+   "tracklength": 1,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 6932,
+   "name": "Limbyspåret, nr 31",
+   "comment": "",
+   "information": "",
+   "tracklength": 5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": false,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Tekniskt krävande spår för lite mer avancerade åkare. Endast klassisk skidåkning som det var förr.",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  }
+ ],
+ "images": [
+  {
+   "id": "3519",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/778747e4-403c-4a97-acd4-be7a57de4e36.jpg",
+   "description": "Målet Ski Classics 2025"
+  },
+  {
+   "id": "3521",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/dcf0ae92-413a-446c-b71c-81d4369c62ca.jpg",
+   "description": "Tidig snö november 2024"
+  },
+  {
+   "id": "3520",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/62436bb7-28ec-42a3-b9da-b758d558d550.jpg",
+   "description": "Nallerundan"
+  },
+  {
+   "id": "3522",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/27ecbab0-110c-471a-845e-f1e6673bb744.jpg",
+   "description": "Rädsjöstugan"
+  },
+  {
+   "id": "3523",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/7b71d161-22b7-49e8-a223-f2ccdcd4fec8.jpg",
+   "description": "Skidspår Toppstugan "
+  },
+  {
+   "id": "2181",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/42d6cf407b1f6ba96af8bc4560d66f34.jpg",
+   "description": ""
+  },
+  {
+   "id": "682",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/c6e2af77f1aa1c659c5c6a9d6cb5a44b.jpg",
+   "description": "Nya Toppstugan"
+  },
+  {
+   "id": "2251",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/4f11fc4eec4507ec4ce632e74c2b515e.jpg",
+   "description": "Kallbolsrundan den 2 januari 2018."
+  }
+ ]
+}

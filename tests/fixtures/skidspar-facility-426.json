@@ -1,0 +1,236 @@
+{
+ "id": 426,
+ "name": "Engelbrektsspåret i Norberg",
+ "place": "",
+ "websites": [
+  "https://www.engelbrektsloppet.se/engelbrektsspret"
+ ],
+ "general_description": "Från 1 december är konstsnöspåren öppna.",
+ "municipality": {
+  "id": 216,
+  "county": 19,
+  "name": "Norberg",
+  "code": 1962,
+  "codedname": "norberg"
+ },
+ "coded_name": "nordansjo",
+ "coded_path": "vastmanland/norberg/nordansjo",
+ "description": "",
+ "numLikes": 0,
+ "numSubscribers": 212,
+ "lat": 60.09349822998047,
+ "lng": 15.900799751281738,
+ "contact": "info@engelbrektsloppet.se eller tel 0223-204 19",
+ "responsibleOperations": "Föreningen Spåralliansen i Norberg. ",
+ "routeDescription": "Från Rv 68 vid campingen, kör 3 km mot Fragg. Följ därefter hänvisning ”Engelbrektsspåret\".",
+ "trackOverview": {
+  "shortestTrack": 2.5,
+  "longestTrack": 27,
+  "numberOfTracks": 5,
+  "haveLitTracks": true,
+  "haveTracksWithFee": true,
+  "numGroomedTacks": 0,
+  "hoursSinceGrooming": 838.9997
+ },
+ "hasAdmin": true,
+ "notice": "Följ senaste nytt om spåren genom att läsa spårstatus rapporterna.",
+ "publicGroomingReport": true,
+ "trackFeeBuyUrl": null,
+ "trackFeeProductId": null,
+ "electricLightingInfo": {
+  "description": "Elljusspåret är tänt från skymning till klockan 22:00 alla dagar när det finns skidspår. Du kan också tända själv."
+ },
+ "changingRoom": {
+  "description": "Ja, dusch och omklädning kan ske i klubbstugan mot avgift vissa tider. Toalett finns. Se Norbergs OK:s hemsida för aktuell information. https://www.norbergsok.se/nok-stugan/nok-stugan-oppettider"
+ },
+ "restaurant": {
+  "description": "Ja, vissa tider. Se Norbergs OK:s hemsida för aktuell information. https://www.norbergsok.se/nok-stugan/nok-stugan-oppettider"
+ },
+ "trackFeeInfo": {
+  "description": "Spåren är avgiftsbelagda. \r\n"
+ },
+ "parking": {
+  "description": "Finns vid Norbergs OK:s klubbstuga."
+ },
+ "trackMaps": [
+  "https://app.racemaps.se/konstsnosparet-42/20"
+ ],
+ "tracks": [
+  {
+   "id": 7900,
+   "name": "Elljusspår Nordansjö",
+   "comment": "",
+   "information": "",
+   "tracklength": 2.8,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": true
+   },
+   "description": "Växlande flackt och småkuperat. Även barnvänligt",
+   "trackmarking": {
+    "gcolor1": "#ed1b23",
+    "gcolor2": "#ed1b23",
+    "id": 28,
+    "name": "Röd"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7898,
+   "name": "Konstsnöspåret",
+   "comment": "",
+   "information": "",
+   "tracklength": 10,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": false
+   },
+   "description": "Rolig och varierande skidåkning, flera partier med stakåkning. Det perfekta motionsspåret.",
+   "trackmarking": {
+    "gcolor1": "#0054a6",
+    "gcolor2": "#0054a6",
+    "id": 1,
+    "name": "Blå"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 8476,
+   "name": "Del av konstsnöspåret",
+   "comment": "",
+   "information": "",
+   "tracklength": 2.5,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": true,
+    "islit": false
+   },
+   "description": "",
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7899,
+   "name": "Håberget",
+   "comment": "",
+   "information": "",
+   "tracklength": 9,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Flackt första 5 km, sedan kraftigt uppför 60m stigning under 700 meter. Härlig utförslöpa i 3,5 km avbruten av några uppförsbackar, avslutas flackt sista kilometern.",
+   "trackmarking": {
+    "gcolor1": "#f26521",
+    "gcolor2": "#f26521",
+    "id": 55,
+    "name": "Orange"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  },
+  {
+   "id": 7897,
+   "name": "Engelbrektsspåret",
+   "comment": "",
+   "information": "",
+   "tracklength": 27,
+   "isActive": true,
+   "properties": {
+    "dogsallowed": false,
+    "hastrackfee": true,
+    "hastracksforclassic": true,
+    "hastracksforskate": true,
+    "isartificialsnow": false,
+    "islit": false
+   },
+   "description": "Innehåller varierande skidåkning, både platta stakpartier genom flera vackra sjöområden, småkuperad skogsterräng samt två större enskilda stigningar.",
+   "trackmarking": {
+    "gcolor1": "#00a633",
+    "gcolor2": "#00a633",
+    "id": 10,
+    "name": "Grön"
+   },
+   "geometry": null,
+   "status": {
+    "classicQuality": 0,
+    "lastGroomedClassic": "unknown",
+    "lastGroomedSkate": "unknown",
+    "skateQuality": 0
+   }
+  }
+ ],
+ "images": [
+  {
+   "id": "1109",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/3ed263f782dd834f0b888da51886328c.jpg",
+   "description": "Elljusspåret"
+  },
+  {
+   "id": "1960",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/4ad32a3becd894462c53c9f01c0be3db.jpg",
+   "description": "Elljusspåret Nordansjö"
+  },
+  {
+   "id": "2632",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/8cb505049b476e97241b47a52349fb25.jpg",
+   "description": "Vid NOK-stugan, Nordansjö"
+  },
+  {
+   "id": "2736",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/daa0a805cde9cb01c8802464eb76c2d6.jpeg",
+   "description": ""
+  },
+  {
+   "id": "3212",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/0dd8fe3d198491a7531648c96968b0b8.jpeg",
+   "description": "Perfekta skidspår idag!"
+  },
+  {
+   "id": "3358",
+   "url": "https://skidspar-public-images.s3.eu-north-1.amazonaws.com/c3797b43f0a589b22e8549d5b42574c5.jpg",
+   "description": "Fantastiska spår denna Luciamorgon. Tack Spårpatrullen."
+  }
+ ]
+}

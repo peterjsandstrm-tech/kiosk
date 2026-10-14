@@ -4,6 +4,27 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.7.0 — 2026-10-14
+
+### Added
+- Two facilities outside Stockholm in the ski-track list: Engelbrektsspåret i Norberg and
+  Orsa Grönklitt. They come last in the list (sorted by distance from Sickla).
+- For these two, all tracks are shown, natural-snow tracks included, with the most
+  recently groomed first; at most five lines, then "+N spår till" (Grönklitt has 31
+  tracks). Tracks without a report keep Skidspår.se's order.
+- Tapping the ski side opens a panel, like the bathing-sample panel, listing all tracks of
+  the chosen facility (also the natural-snow tracks the card leaves out for the Stockholm
+  artificial-snow facilities), most recently groomed first, each with length, grooming
+  and rating for classic and skate, and snow type, lighting, track fee and dogs allowed.
+  It scrolls by touch and closes with ✕, a tap outside or after 2 minutes. What else to
+  show per track will be decided once the season gives real data.
+
+### Changed
+- The facts line on the ski side gives the artificial-snow share when a facility has both
+  kinds ("51,3 km, varav 15,3 km konstsnö").
+- The "+N spår till" line on the ski side counts every track not on the card and adds
+  "· tryck för alla".
+
 ## 1.6.0 — 2026-10-09
 
 ### Added

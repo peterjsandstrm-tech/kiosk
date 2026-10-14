@@ -43,7 +43,10 @@ function mockWeek(offset) {
 // Skidspår.se facilities: Saltsjöbaden in a groomed state, the others as captured
 // off-season (2026-10-09, all statuses "unknown"); any other id answers 404.
 // Stockholms stadion (2182) is served the captured Saltsjöbaden answer, whose notice is dated 2026-02-04.
-const SKI_FIXTURES = { 1655: 'skidspar-facility-1655-groomed.json', 48: 'skidspar-facility-48.json', 18: 'skidspar-facility-18.json', 2182: 'skidspar-facility-1655.json' };
+// Norberg (426) as captured 2026-10-14; Orsa Grönklitt (495) captured 2026-10-14 with three tracks
+// hand-edited as groomed: Böllingmyren nr 14 (3 h), Elitspåret nr 6 (30 h), Vägspåren nr 19 (50 h, classic only).
+const SKI_FIXTURES = { 1655: 'skidspar-facility-1655-groomed.json', 48: 'skidspar-facility-48.json', 18: 'skidspar-facility-18.json', 2182: 'skidspar-facility-1655.json',
+  426: 'skidspar-facility-426.json', 495: 'skidspar-facility-495-groomed.json' };
 
 let tennisMode = 'ok';
 let tennisRequests = 0;
@@ -140,6 +143,7 @@ const load = async () => {
 };
 const face = () => evaluate(`document.getElementById('faceBathing').hidden ? 'tennis' : 'bathing'`);
 const overlayOpen = () => evaluate(`document.getElementById('bathingOverlay').classList.contains('visible')`);
+const skiOverlayOpen = () => evaluate(`document.getElementById('skiOverlay').classList.contains('visible')`);
 
 before(async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -382,12 +386,12 @@ test('ski side: Saltsjöbaden by default, groomed status and notice', async () =
   assert.match(t.status, /^Källa: Skidspår\.se · uppdaterad \d\d:\d\d$/);
 });
 
-test('ski list: all 16 facilities, nearest to Sickla first', async () => {
+test('ski list: all 18 facilities, nearest to Sickla first', async () => {
   const names = await evaluate(`[...document.getElementById('skiSelect').options].map(o => o.textContent)`);
-  assert.equal(names.length, 16);
+  assert.equal(names.length, 18);
   assert.equal(names[0], 'Hellasgården (natursnö)');
   assert.ok(names.includes('Saltsjöbadens Skidarena') && names.includes('Ågesta friluftsgård'));
-  assert.equal(names[names.length - 1], 'Lundåsvallen, Häverödal');
+  assert.deepEqual(names.slice(-3), ['Lundåsvallen, Häverödal', 'Engelbrektsspåret i Norberg', 'Orsa Grönklitt']);
 });
 
 test('choosing Hellasgården shows its natural-snow tracks without a report', async () => {
@@ -396,16 +400,86 @@ test('choosing Hellasgården shows its natural-snow tracks without a report', as
   const t = await skiText();
   assert.equal(t.headlineClass, 'ski-headline');
   assert.equal(t.tracks.length, 5);
-  assert.equal(t.more, '+1 spår till');
+  assert.equal(t.more, '+1 spår till · tryck för alla');
   assert.match(t.facts, /natursnö/);
   assert.match(t.tracks[0], /Klassiskt: –/);
+});
+
+test('Norberg shows all its tracks, natural snow included, and the mixed snow in the facts', async () => {
+  await chooseSki(426);
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '426' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
+  const t = await skiText();
+  assert.equal(t.tracks.length, 5);
+  assert.equal(t.more, '');
+  assert.ok(t.tracks.some(x => /^Engelbrektsspåret 27 km/.test(x)), 'the natural-snow Engelbrektsspåret is shown');
+  assert.ok(t.tracks.some(x => /^Håberget 9 km/.test(x)));
+  assert.equal(t.facts, '51,3\u00a0km, varav 15,3\u00a0km konstsnö · elljus · spåravgift');
+});
+
+test('Orsa Grönklitt shows the most recently groomed of its 31 tracks first, five at most', async () => {
+  await chooseSki(495);
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '495' && /Spårat/.test(document.getElementById('skiHeadline').textContent)`));
+  const t = await skiText();
+  assert.equal(t.headline, 'Spårat för ca 3\u00a0h sedan');
+  assert.equal(t.tracks.length, 5);
+  assert.equal(t.more, '+26 spår till · tryck för alla');
+  assert.match(t.tracks[0], /^Böllingmyren, nr 14 11 km Klassiskt: Idag \(Riktigt bra\) · Skate: Idag \(Bra\)/);
+  assert.match(t.tracks[1], /^Elitspåret, nr 6 10 km Klassiskt: Igår \(Ganska bra\) · Skate: Igår$/);
+  assert.match(t.tracks[2], /^Vägspåren, nr 19 39 km Klassiskt: 2 dagar sedan/);
+  // Ungroomed tracks keep the facility's order
+  assert.match(t.tracks[3], /^Elitspåret, nr 1 1,5 km/);
+  assert.match(t.tracks[4], /^Elitspåret, nr 2 2,5 km/);
+  assert.match(t.facts, /km, varav .* konstsnö · elljus · spåravgift$/);
+});
+
+test('tapping the ski side opens a panel with all tracks, most recently groomed first', async () => {
+  assert.equal(await skiOverlayOpen(), false);
+  await tap('#skiHeadline');
+  assert.equal(await skiOverlayOpen(), true);
+  assert.equal(await overlayOpen(), false, 'the bathing panel stays closed');
+  const o = await evaluate(`({
+    title: document.getElementById('skiOverlayTitle').textContent,
+    meta: document.getElementById('skiOverlayMeta').textContent,
+    tracks: [...document.querySelectorAll('#skiOverlayList .ski-overlay-track')].map(t => t.textContent.replace(/\\s+/g, ' ').trim()),
+  })`);
+  assert.equal(o.title, '⛷️ Orsa Grönklitt · 31 spår');
+  assert.match(o.meta, /^179,1\u00a0km, varav 16,1\u00a0km konstsnö · elljus · spåravgift · senast preparerade först · Källa: Skidspår\.se, uppdaterad \d\d:\d\d$/);
+  assert.equal(o.tracks.length, 31);
+  assert.match(o.tracks[0], /^Böllingmyren, nr 14 11 km Klassiskt: Idag \(Riktigt bra\) · Skate: Idag \(Bra\) natursnö · spåravgift$/);
+  assert.match(o.tracks[3], /^Elitspåret, nr 1 1,5 km .* konstsnö · elljus · spåravgift$/);
+  assert.match(o.tracks[30], /^Limbyspåret, nr 31 5 km Klassiskt: – natursnö · spåravgift$/);
+  assert.ok(o.tracks.some(t => /^Hund & Pulkaspåret, nr 12 .* hundar tillåtna$/.test(t)));
+  // Tapping inside keeps it open, ✕ closes it
+  await tap('#skiOverlayList');
+  assert.equal(await skiOverlayOpen(), true);
+  await tap('#skiOverlayClose');
+  assert.equal(await skiOverlayOpen(), false);
+  // A tap outside closes it too
+  await tap('#skiHeadline');
+  assert.equal(await skiOverlayOpen(), true);
+  await tap('.footer-note');
+  assert.equal(await skiOverlayOpen(), false);
+});
+
+test('the ski panel also lists the natural-snow tracks the card leaves out', async () => {
+  await chooseSki(18); // Ågesta: the card shows only its artificial-snow track
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '18' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
+  const t = await skiText();
+  const all = await evaluate(`skiAllTracks(skiState[18].data).length`);
+  assert.ok(all > t.tracks.length, 'Ågesta has more tracks than the card shows');
+  assert.equal(t.more, `+${all - t.tracks.length} spår till · tryck för alla`);
+  await tap('#skiHeadline');
+  assert.equal(await evaluate(`document.querySelectorAll('#skiOverlayList .ski-overlay-track').length`), all);
+  await tap('#skiOverlayClose');
+  await chooseSki(495);
+  assert.ok(await waitFor(`document.getElementById('skiSelect').value === '495' && /Spårat/.test(document.getElementById('skiHeadline').textContent)`));
 });
 
 test('the chosen facility and the ski side survive a reload', async () => {
   await load();
   assert.equal(await evaluate(`document.getElementById('faceSki').hidden`), false);
-  assert.ok(await waitFor(`/Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
-  assert.equal((await skiText()).selected, 'Hellasgården (natursnö)');
+  assert.ok(await waitFor(`/Spårat/.test(document.getElementById('skiHeadline').textContent)`));
+  assert.equal((await skiText()).selected, 'Orsa Grönklitt');
 });
 
 test('an operator notice older than 30 days is not shown', async () => {
@@ -432,6 +506,8 @@ test('swiping wraps around: ski → bathing → ski', async () => {
   assert.equal(await face(), 'bathing');
   await swipe(0.6);
   assert.equal(await evaluate(`document.getElementById('faceSki').hidden`), false);
+  assert.equal(await skiOverlayOpen(), false, 'a swipe does not open the ski panel');
+  assert.equal(await overlayOpen(), false, 'a swipe does not open the bathing panel');
   await tap('.card-dots span[data-face="bathing"]');
   await sleep(300);
   assert.equal(await face(), 'bathing');

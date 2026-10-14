@@ -249,6 +249,8 @@
   }
   .ski-track-name { font-weight: 600; }
   .ski-track-status { color: var(--muted); font-size: 0.72rem; }
+  .ski-overlay-track { font-size: 0.85rem; padding: 8px 12px; }
+  .ski-overlay-track .ski-track-status { font-size: 0.75rem; margin-top: 2px; }
   .ski-facts {
     width: 100%;
     margin-top: 8px;
@@ -832,6 +834,15 @@
     <div class="bo-list" id="bathingOverlayList"></div>
   </div>
 
+  <div class="bathing-overlay" id="skiOverlay" role="dialog" aria-label="Alla skidspår">
+    <div class="bo-header">
+      <span class="bo-title" id="skiOverlayTitle">⛷️ Skidspår</span>
+      <button class="bo-close" id="skiOverlayClose" aria-label="Stäng">✕</button>
+    </div>
+    <div class="bo-meta" id="skiOverlayMeta"></div>
+    <div class="bo-list" id="skiOverlayList"></div>
+  </div>
+
   <div class="footer-note">Väder: SMHI Open Data · Buss/tåg: SL Transport API (trafiklab.se) · Badvatten: Havs- och vattenmyndigheten · VMA: Krisinformation.se · Radar: MET Norway · Tennis: Sicklasjöns BK (commodusnet.net) · Skidspår: Skidspår.se</div>
   <div class="footer-note">Skapad av Sandstream · <span id="appVersion"></span></div>
 </div>
@@ -845,7 +856,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1445,8 +1456,7 @@ function renderBathingOverlay() {
   }).join('');
 }
 
-function positionBathingOverlay() {
-  const overlay = document.getElementById('bathingOverlay');
+function positionBathingOverlay(overlay = document.getElementById('bathingOverlay')) {
   const topRow = document.querySelector('.top-row');
   const busCard = document.getElementById('busCard');
   // Från väderrutans överkant ner över största delen av avgångsrutan
@@ -1470,9 +1480,11 @@ function closeBathingOverlay() {
 
 document.getElementById('clockCard').addEventListener('click', (e) => {
   e.stopPropagation();
-  // Ett svep ska bara vända rutan, och på tennissidan öppnas inga badprov
-  if (suppressCardClick || cardFace !== 'bathing') return;
-  openBathingOverlay();
+  // Ett svep ska bara vända rutan; badsidan öppnar badproven, skidsidan alla
+  // spår och tennissidan ingenting
+  if (suppressCardClick) return;
+  if (cardFace === 'bathing') openBathingOverlay();
+  else if (cardFace === 'ski') openSkiOverlay();
 });
 document.getElementById('bathingOverlayClose').addEventListener('click', (e) => {
   e.stopPropagation();
@@ -1485,10 +1497,14 @@ document.getElementById('bathingOverlay').addEventListener('click', (e) => {
 });
 document.addEventListener('click', () => {
   if (document.getElementById('bathingOverlay').classList.contains('visible')) closeBathingOverlay();
+  if (document.getElementById('skiOverlay').classList.contains('visible')) closeSkiOverlay();
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBathingOverlay(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeBathingOverlay(); closeSkiOverlay(); }
+});
 window.addEventListener('resize', () => {
   if (document.getElementById('bathingOverlay').classList.contains('visible')) positionBathingOverlay();
+  if (document.getElementById('skiOverlay').classList.contains('visible')) positionBathingOverlay(document.getElementById('skiOverlay'));
 });
 
 loadBathingWater();
@@ -1670,8 +1686,11 @@ const SKI_RETRY_MS = 5 * 60 * 1000;
 const SKI_STORAGE_KEY = 'kiosk-sickla-ski-facility';
 const SKI_DEFAULT_ID = 1655; // Saltsjöbadens Skidarena
 // Stockholms läns konstsnöanläggningar på Skidspår.se (2026-10-09) plus
-// Hellasgården, som bara har natursnö. Sorteras efter avstånd från Sickla.
+// Hellasgården, som bara har natursnö, och två anläggningar längre bort där
+// alla spår visas (allTracks). Sorteras efter avstånd från Sickla.
 const SKI_FACILITIES = [
+  { id: 426, name: 'Engelbrektsspåret i Norberg', lat: 60.093, lng: 15.901, allTracks: true },
+  { id: 495, name: 'Orsa Grönklitt', lat: 61.211, lng: 14.531, allTracks: true },
   { id: 1655, name: 'Saltsjöbadens Skidarena', lat: 59.283, lng: 18.270 },
   { id: 48, name: 'Hellasgården (natursnö)', lat: 59.290, lng: 18.159 },
   { id: 18, name: 'Ågesta friluftsgård', lat: 59.223, lng: 18.103 },
@@ -1727,6 +1746,7 @@ async function loadSki(id) {
     state.loading = false;
   }
   if (id === skiFacilityId && cardFace === 'ski') renderSki();
+  if (id === skiFacilityId && document.getElementById('skiOverlay').classList.contains('visible')) renderSkiOverlay();
 }
 
 function skiTick() {
@@ -1737,11 +1757,30 @@ function skiTick() {
   renderSki();
 }
 
-// Spåren som visas: konstsnöspåren om anläggningen har några, annars alla
-function skiShownTracks(data) {
+// Spåren som visas: konstsnöspåren om anläggningen har några, annars alla.
+// För anläggningar med allTracks visas alla spår, senast preparerade först
+// (sorteringen är stabil, så opreparerade spår behåller anläggningens ordning).
+function skiShownTracks(data, facility) {
   const active = data.tracks.filter(t => t.isActive !== false);
+  if (facility?.allTracks) return skiAllTracks(data);
   const artificial = active.filter(t => t.properties?.isartificialsnow);
   return artificial.length ? artificial : active;
+}
+
+// Alla aktiva spår, senast preparerade först (rutan som öppnas med ett tryck)
+function skiAllTracks(data) {
+  return data.tracks.filter(t => t.isActive !== false).sort((a, b) => skiGroomedRank(a) - skiGroomedRank(b));
+}
+
+// Lägre värde = nyare preparering: timmar om de finns, annars koden
+// (justnow … 7days) räknad som timmar, och okänt sist
+const SKI_GROOMED_HOURS = { justnow: 0, today: 12, '1day': 36, '2days': 60, '4days': 108, '7days': 180 };
+function skiGroomedRank(track) {
+  const st = track.status || {};
+  const hours = [st.ageHoursOfClassicGrooming, st.ageHoursOfSkateGrooming].filter(a => typeof a === 'number' && a >= 0);
+  if (hours.length) return Math.min(...hours);
+  const coded = [st.lastGroomedClassic, st.lastGroomedSkate].map(c => SKI_GROOMED_HOURS[c]).filter(h => h !== undefined);
+  return coded.length ? Math.min(...coded) : Infinity;
 }
 
 // Rubriken: hur länge sedan något av spåren preparerades
@@ -1790,6 +1829,19 @@ function formatSkiNotice(notice, now = Date.now()) {
   return text.replace(/^(\d{4}-\d{2}-\d{2}) (?!:)/, '$1: ');
 }
 
+// "51,3 km, varav 15,3 km konstsnö · elljus · spåravgift"
+function skiFacts(tracks) {
+  const km = (list) => list.reduce((sum, t) => sum + (t.tracklength || 0), 0);
+  const totalKm = km(tracks);
+  const artificialKm = km(tracks.filter(t => t.properties?.isartificialsnow));
+  const facts = [artificialKm === 0 ? `${formatKm(totalKm)} natursnö`
+    : artificialKm === totalKm ? `${formatKm(totalKm)} konstsnö`
+    : `${formatKm(totalKm)}, varav ${formatKm(artificialKm)} konstsnö`];
+  if (tracks.some(t => t.properties?.islit)) facts.push('elljus');
+  if (tracks.some(t => t.properties?.hastrackfee)) facts.push('spåravgift');
+  return facts.join(' · ');
+}
+
 function formatKm(km) {
   return `${String(Math.round(km * 10) / 10).replace('.', ',')}\u00a0km`;
 }
@@ -1809,24 +1861,23 @@ function renderSki() {
     return;
   }
 
-  const tracks = skiShownTracks(data);
+  const tracks = skiShownTracks(data, SKI_FACILITIES.find(f => f.id === skiFacilityId));
   const headline = skiHeadline(tracks);
   headlineEl.className = `ski-headline ${headline.cls}`.trim();
   headlineEl.textContent = headline.text;
 
+  // Högst fem spår på kortet; resten (även natursnöspår som kortet hoppar
+  // över) finns i rutan som öppnas med ett tryck
   const MAX_TRACKS = 5;
-  tracksEl.innerHTML = tracks.slice(0, MAX_TRACKS).map(t => `
+  const shown = tracks.slice(0, MAX_TRACKS);
+  const hidden = skiAllTracks(data).length - shown.length;
+  tracksEl.innerHTML = shown.map(t => `
     <div class="ski-track">
       <div class="ski-track-name">${escapeHtml(t.name || 'Slinga')} ${formatKm(t.tracklength || 0)}</div>
       <div class="ski-track-status">${escapeHtml(skiTrackStatus(t))}</div>
-    </div>`).join('') + (tracks.length > MAX_TRACKS ? `<div class="ski-track-status">+${tracks.length - MAX_TRACKS} spår till</div>` : '');
+    </div>`).join('') + (hidden > 0 ? `<div class="ski-track-status">+${hidden} spår till · tryck för alla</div>` : '');
 
-  const artificial = tracks.some(t => t.properties?.isartificialsnow);
-  const totalKm = tracks.reduce((sum, t) => sum + (t.tracklength || 0), 0);
-  const facts = [`${formatKm(totalKm)} ${artificial ? 'konstsnö' : 'natursnö'}`];
-  if (tracks.some(t => t.properties?.islit)) facts.push('elljus');
-  if (tracks.some(t => t.properties?.hastrackfee)) facts.push('spåravgift');
-  factsEl.textContent = facts.join(' · ');
+  factsEl.textContent = skiFacts(tracks);
 
   noticeEl.textContent = formatSkiNotice(data.notice);
 
@@ -1835,6 +1886,67 @@ function renderSki() {
   if (state.error) status += ` · ⚠ kunde inte uppdatera (${state.error})`;
   statusEl.textContent = status;
 }
+
+// ---------- Skidspår: ruta med alla spår ----------
+// Öppnas med ett tryck på skidsidan, stängs med ✕, ett tryck utanför eller
+// efter 2 minuter, som badrutan. Mer information per spår kan läggas till
+// när säsongen ger riktiga data.
+let skiOverlayTimer = null;
+
+function renderSkiOverlay() {
+  const facility = SKI_FACILITIES.find(f => f.id === skiFacilityId);
+  const state = skiState[skiFacilityId];
+  const data = state?.data;
+  const titleEl = document.getElementById('skiOverlayTitle');
+  const metaEl = document.getElementById('skiOverlayMeta');
+  const listEl = document.getElementById('skiOverlayList');
+  if (!data) {
+    titleEl.textContent = `⛷️ ${facility?.name || 'Skidspår'}`;
+    metaEl.textContent = '';
+    listEl.innerHTML = `<div class="status-msg">${state?.error ? `Kunde inte hämta spårstatus (${escapeHtml(state.error)})` : 'Hämtar spårstatus…'}</div>`;
+    return;
+  }
+  const tracks = skiAllTracks(data);
+  titleEl.textContent = `⛷️ ${facility?.name || data.name} · ${tracks.length} spår`;
+  const updated = new Date(state.fetchedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  metaEl.textContent = `${skiFacts(tracks)} · senast preparerade först · Källa: Skidspår.se, uppdaterad ${updated}`;
+  listEl.innerHTML = tracks.map(t => {
+    const p = t.properties || {};
+    const tags = [p.isartificialsnow ? 'konstsnö' : 'natursnö', p.islit && 'elljus', p.hastrackfee && 'spåravgift', p.dogsallowed && 'hundar tillåtna']
+      .filter(Boolean).join(' · ');
+    return `
+    <div class="bo-sample ski-overlay-track">
+      <div class="ski-track-name">${escapeHtml(t.name || 'Slinga')} ${formatKm(t.tracklength || 0)}</div>
+      <div class="ski-track-status">${escapeHtml(skiTrackStatus(t))}</div>
+      <div class="ski-track-status">${escapeHtml(tags)}</div>
+    </div>`;
+  }).join('');
+}
+
+function openSkiOverlay() {
+  const overlay = document.getElementById('skiOverlay');
+  renderSkiOverlay();
+  positionBathingOverlay(overlay);
+  overlay.classList.add('visible');
+  document.getElementById('skiOverlayList').scrollTop = 0;
+  clearTimeout(skiOverlayTimer);
+  skiOverlayTimer = setTimeout(closeSkiOverlay, BATHING_OVERLAY_AUTOCLOSE_MS);
+}
+
+function closeSkiOverlay() {
+  clearTimeout(skiOverlayTimer);
+  document.getElementById('skiOverlay').classList.remove('visible');
+}
+
+document.getElementById('skiOverlayClose').addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeSkiOverlay();
+});
+document.getElementById('skiOverlay').addEventListener('click', (e) => {
+  e.stopPropagation(); // tryck inne i rutan (t.ex. för att skrolla) stänger den inte
+  clearTimeout(skiOverlayTimer);
+  skiOverlayTimer = setTimeout(closeSkiOverlay, BATHING_OVERLAY_AUTOCLOSE_MS);
+});
 
 (function setupSkiSelect() {
   const select = document.getElementById('skiSelect');
