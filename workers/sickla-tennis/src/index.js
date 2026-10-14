@@ -18,7 +18,6 @@ const CLUB_ID = 59;
 const SCHEDULE_URL = 'https://www.commodusnet.net/kund/adminschedule.php';
 const CACHE_SECONDS = 15 * 60;
 const FETCH_TIMEOUT_MS = 10 * 1000;
-const TIME_ZONE = 'Europe/Stockholm';
 const USER_AGENT = 'SicklaKiosk/1.0 (+https://github.com/peterjsandstrm-tech/kiosk)';
 
 const CORS_HEADERS = {
@@ -28,9 +27,22 @@ const CORS_HEADERS = {
 
 // ---------- Dates (all as 'YYYY-MM-DD' in Stockholm time) ----------
 
+// The first Intl.DateTimeFormat with a time zone in a fresh isolate loads the
+// time-zone data and costs 15–25 ms of CPU, more than the free plan's 10 ms
+// per request. With little traffic most requests hit a fresh isolate, so the
+// Stockholm date is computed from the EU summer-time rule instead: UTC+2 from
+// 01:00 UTC on the last Sunday of March to 01:00 UTC on the last Sunday of
+// October, otherwise UTC+1.
+function lastSundayUtc(year, monthIndex) {
+  const lastDay = new Date(Date.UTC(year, monthIndex + 1, 0, 1));
+  lastDay.setUTCDate(lastDay.getUTCDate() - lastDay.getUTCDay());
+  return lastDay.getTime();
+}
+
 function todayInStockholm(now = new Date()) {
-  // sv-SE formats dates as YYYY-MM-DD
-  return new Intl.DateTimeFormat('sv-SE', { timeZone: TIME_ZONE }).format(now);
+  const year = now.getUTCFullYear();
+  const summer = now >= lastSundayUtc(year, 2) && now < lastSundayUtc(year, 9);
+  return formatDate(new Date(now.getTime() + (summer ? 2 : 1) * 3600000));
 }
 
 function parseDate(iso) {

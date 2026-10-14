@@ -10,7 +10,7 @@ import path from 'node:path';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (date) => fs.readFileSync(path.join(here, 'fixtures', `commodus-${date}.html`));
 const worker = await import('../workers/sickla-tennis/src/index.js');
-const { parseDayPage, buildWeek, mondayOf, isoWeekNumber } = worker;
+const { parseDayPage, buildWeek, mondayOf, isoWeekNumber, todayInStockholm } = worker;
 
 const latin1 = (buffer) => buffer.toString('latin1');
 
@@ -73,6 +73,22 @@ test('week dates: Monday start and ISO week numbers', () => {
   assert.equal(isoWeekNumber('2026-01-01'), 1);
   assert.equal(isoWeekNumber('2027-01-01'), 53); // 2026 has 53 ISO weeks
   assert.equal(isoWeekNumber('2027-01-04'), 1);
+});
+
+test('Stockholm date without Intl matches Intl every half hour 2024–2035', () => {
+  const reference = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm' });
+  const end = Date.UTC(2036, 0, 1);
+  for (let t = Date.UTC(2024, 0, 1); t < end; t += 30 * 60 * 1000) {
+    const now = new Date(t);
+    assert.equal(todayInStockholm(now), reference.format(now), now.toISOString());
+  }
+  // Around midnight on the summer-time change days
+  assert.equal(todayInStockholm(new Date('2026-03-28T22:59:00Z')), '2026-03-28');
+  assert.equal(todayInStockholm(new Date('2026-03-28T23:00:00Z')), '2026-03-29');
+  assert.equal(todayInStockholm(new Date('2026-10-24T21:59:00Z')), '2026-10-24');
+  assert.equal(todayInStockholm(new Date('2026-10-24T22:00:00Z')), '2026-10-25');
+  assert.equal(todayInStockholm(new Date('2026-10-25T22:59:00Z')), '2026-10-25');
+  assert.equal(todayInStockholm(new Date('2026-10-25T23:00:00Z')), '2026-10-26');
 });
 
 test('current week: passed days are not fetched, the rest are', async () => {
