@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.7.1 — 2026-10-25
+
+### Fixed
+- The ski headline now also uses the facility's own grooming age from Skidspår.se
+  (`trackOverview.hoursSinceGrooming`), not only the per-track ages. A grooming report
+  that names no tracks updates only the facility figure: on 2026-10-25 Orsa Grönklitt
+  showed "Spårat för ca 33 h sedan" although Skidspår.se reported 9 h. The no-report
+  value (838.9997 h) is ignored, so facilities without a report still show
+  "Ingen aktuell spårrapport". The per-track lines are unchanged.
+
 ## 1.7.0 — 2026-10-14
 
 ### Added

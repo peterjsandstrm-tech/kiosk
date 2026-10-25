@@ -432,6 +432,15 @@ test('Orsa Grönklitt shows the most recently groomed of its 31 tracks first, fi
   assert.match(t.facts, /km, varav .* konstsnö · elljus · spåravgift$/);
 });
 
+test('the ski headline uses the facility grooming age when it is newer than the tracks', async () => {
+  // Orsa Grönklitt 2026-10-25: Elitspåret nr 1 said 33 h, the facility 9.3 h
+  const headline = (overview) => evaluate(`skiHeadline([{ status: { ageHoursOfClassicGrooming: 33, ageHoursOfSkateGrooming: 33 } }], ${JSON.stringify(overview)}).text`);
+  assert.equal(await headline({ hoursSinceGrooming: 9.3469 }), 'Spårat för ca 9 h sedan');
+  assert.equal(await headline({ hoursSinceGrooming: 838.9997 }), 'Spårat för ca 33 h sedan', 'the no-report value is ignored');
+  assert.equal(await headline(undefined), 'Spårat för ca 33 h sedan');
+  assert.equal(await evaluate(`skiHeadline([], { hoursSinceGrooming: 838.9997 }).text`), 'Ingen aktuell spårrapport');
+});
+
 test('tapping the ski side opens a panel with all tracks, most recently groomed first', async () => {
   assert.equal(await skiOverlayOpen(), false);
   await tap('#skiHeadline');

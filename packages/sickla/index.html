@@ -856,7 +856,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.7.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1783,10 +1783,15 @@ function skiGroomedRank(track) {
   return coded.length ? Math.min(...coded) : Infinity;
 }
 
-// Rubriken: hur länge sedan något av spåren preparerades
-function skiHeadline(tracks) {
+// Rubriken: hur länge sedan något av spåren preparerades. Anläggningens egen
+// siffra (trackOverview.hoursSinceGrooming) kan vara nyare än spårens, t.ex.
+// när en spårrapport inte anger slingor; utan rapport är den 838.9997, så
+// bara värden under en vecka räknas.
+function skiHeadline(tracks, overview) {
   const ages = tracks.flatMap(t => [t.status?.ageHoursOfClassicGrooming, t.status?.ageHoursOfSkateGrooming])
     .filter(a => typeof a === 'number' && a >= 0);
+  const facilityAge = overview?.hoursSinceGrooming;
+  if (typeof facilityAge === 'number' && facilityAge >= 0 && facilityAge < 168) ages.push(facilityAge);
   if (ages.length) {
     const h = Math.min(...ages);
     if (h < 1) return { text: 'Nyspårat', cls: 'fresh' };
@@ -1862,7 +1867,7 @@ function renderSki() {
   }
 
   const tracks = skiShownTracks(data, SKI_FACILITIES.find(f => f.id === skiFacilityId));
-  const headline = skiHeadline(tracks);
+  const headline = skiHeadline(tracks, data.trackOverview);
   headlineEl.className = `ski-headline ${headline.cls}`.trim();
   headlineEl.textContent = headline.text;
 
