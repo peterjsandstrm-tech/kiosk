@@ -4,6 +4,16 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.8.0 — 2026-10-25
+
+### Added
+- SMHI weather warnings for Sickla are shown up to 24 hours before they start, with the
+  start time after the title ("Vind · från kl. 08:00", or "från i morgon kl. 05:30" when it
+  starts the next day). Before, a warning appeared only once it was in force: the yellow
+  wind warning for eastern Stockholm County on 2026-10-25 (08:00–18:00), published two days
+  earlier, was not visible until 08:00. Warnings further ahead are still left out. Within a
+  level, warnings in force come before upcoming ones.
+
 ## 1.7.1 — 2026-10-25
 
 ### Fixed

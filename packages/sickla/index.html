@@ -856,7 +856,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.7.1';
+const APP_VERSION = '1.8.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -926,46 +926,62 @@ const warningLevelInfo = {
   MESSAGE: { cssClass: 'level-message', icon: 'ℹ️' }
 };
 
+// Varningar som börjar inom så här lång tid visas i förväg, med starttiden
+// i rubriken (SMHI publicerar ofta en varning ett par dygn innan den gäller)
+const WARNING_LOOKAHEAD_MS = 24 * 60 * 60 * 1000;
+
+// "från kl. 08:00" idag, "från i morgon kl. 08:00" nästa dag (plattans lokala tid)
+function formatWarningStart(start, now) {
+  const s = new Date(start), n = new Date(now);
+  const time = `${String(s.getHours()).padStart(2, '0')}:${String(s.getMinutes()).padStart(2, '0')}`;
+  const sameDay = s.getFullYear() === n.getFullYear() && s.getMonth() === n.getMonth() && s.getDate() === n.getDate();
+  return sameDay ? `från kl. ${time}` : `från i morgon kl. ${time}`;
+}
+
+// Varningarna som gäller Sickla nu eller börjar inom WARNING_LOOKAHEAD_MS,
+// allvarligaste nivå först (RED > ORANGE > YELLOW > MESSAGE), pågående före kommande
+function smhiWarningItems(data, now = Date.now()) {
+  const items = [];
+  for (const warning of data) {
+    for (const area of (warning.warningAreas || [])) {
+      const affectsSickla = pointInGeometry(SICKLA_LON, SICKLA_LAT, area.area && area.area.geometry);
+      if (!affectsSickla) continue;
+
+      // Hoppa över varningar vars sluttid redan passerat
+      if (area.approximateEnd && new Date(area.approximateEnd).getTime() < now) continue;
+
+      // Varningar som ännu inte trätt i kraft visas bara om de börjar inom ett dygn
+      const start = area.approximateStart ? new Date(area.approximateStart).getTime() : NaN;
+      const upcoming = start > now;
+      if (upcoming && start - now > WARNING_LOOKAHEAD_MS) continue;
+
+      const levelCode = (area.warningLevel && area.warningLevel.code) || 'MESSAGE';
+      const incidentDescription = (area.descriptions || []).find(d => d.title && d.title.code === 'INCIDENT');
+      items.push({
+        title: (warning.event && warning.event.sv) || (area.eventDescription && area.eventDescription.sv) || 'Varning',
+        levelText: (area.warningLevel && area.warningLevel.sv) || '',
+        levelCode,
+        areaName: (area.areaName && area.areaName.sv) || '',
+        descriptionText: (incidentDescription && incidentDescription.text && incidentDescription.text.sv) || '',
+        startText: upcoming ? formatWarningStart(start, now) : ''
+      });
+    }
+  }
+  const severityOrder = { RED: 0, ORANGE: 1, YELLOW: 2, MESSAGE: 3 };
+  return items.sort((a, b) => ((severityOrder[a.levelCode] ?? 9) - (severityOrder[b.levelCode] ?? 9)) || (!!a.startText - !!b.startText));
+}
+
 async function loadWarnings() {
   const banner = document.getElementById('warningBanner');
   try {
     const data = await fetchJSON('https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json');
-    const now = Date.now();
-    const items = [];
-
-    for (const warning of data) {
-      for (const area of (warning.warningAreas || [])) {
-        const affectsSickla = pointInGeometry(SICKLA_LON, SICKLA_LAT, area.area && area.area.geometry);
-        if (!affectsSickla) continue;
-
-        // Hoppa över varningar vars sluttid redan passerat
-        if (area.approximateEnd && new Date(area.approximateEnd).getTime() < now) continue;
-
-        // Hoppa även över varningar som ännu inte har trätt i kraft
-        // (SMHI publicerar ofta morgondagens varning redan idag)
-        if (area.approximateStart && new Date(area.approximateStart).getTime() > now) continue;
-
-        const levelCode = (area.warningLevel && area.warningLevel.code) || 'MESSAGE';
-        const incidentDescription = (area.descriptions || []).find(d => d.title && d.title.code === 'INCIDENT');
-        items.push({
-          title: (warning.event && warning.event.sv) || (area.eventDescription && area.eventDescription.sv) || 'Varning',
-          levelText: (area.warningLevel && area.warningLevel.sv) || '',
-          levelCode,
-          areaName: (area.areaName && area.areaName.sv) || '',
-          descriptionText: (incidentDescription && incidentDescription.text && incidentDescription.text.sv) || ''
-        });
-      }
-    }
+    const items = smhiWarningItems(data);
 
     if (items.length === 0) {
       banner.className = 'warning-banner';
       banner.innerHTML = '';
       return;
     }
-
-    // Visa allvarligaste nivå överst: RED > ORANGE > YELLOW > MESSAGE
-    const severityOrder = { RED: 0, ORANGE: 1, YELLOW: 2, MESSAGE: 3 };
-    items.sort((a, b) => (severityOrder[a.levelCode] ?? 9) - (severityOrder[b.levelCode] ?? 9));
 
     const topLevel = items[0].levelCode;
     const levelClass = (warningLevelInfo[topLevel] || warningLevelInfo.MESSAGE).cssClass;
@@ -980,7 +996,7 @@ async function loadWarnings() {
         <div class="warning-item">
           <span class="warning-icon">${info.icon}</span>
           <div class="warning-text">
-            <div class="w-title">${item.title}</div>
+            <div class="w-title">${item.title}${item.startText ? ` · ${item.startText}` : ''}</div>
             ${descHtml}
           </div>
         </div>`;

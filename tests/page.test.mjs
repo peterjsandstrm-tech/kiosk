@@ -432,6 +432,32 @@ test('Orsa Grönklitt shows the most recently groomed of its 31 tracks first, fi
   assert.match(t.facts, /km, varav .* konstsnö · elljus · spåravgift$/);
 });
 
+test('SMHI warnings: current ones plus those starting within 24 hours, with the start time', async () => {
+  // A square around Sickla and one far away; now = 2026-10-25 07:30 local time
+  const result = await evaluate(`(() => {
+    const square = (lon, lat) => ({ type: 'Polygon', coordinates: [[[lon - 0.5, lat - 0.5], [lon + 0.5, lat - 0.5], [lon + 0.5, lat + 0.5], [lon - 0.5, lat + 0.5], [lon - 0.5, lat - 0.5]]] });
+    const here = square(SICKLA_LON, SICKLA_LAT), away = square(13.0, 55.6);
+    const at = (d, h, m = 0) => new Date(2026, 9, d, h, m).toISOString();
+    const w = (event, code, geometry, start, end) => ({ event: { sv: event }, warningAreas: [{ warningLevel: { code }, area: { geometry }, approximateStart: start, approximateEnd: end }] });
+    const data = [
+      w('Risk för vattenbrist', 'MESSAGE', here, at(1, 0), undefined),
+      w('Vind', 'YELLOW', here, at(25, 8), at(25, 18)),
+      w('Regn', 'YELLOW', here, at(25, 6), at(25, 20)),
+      w('Snö', 'ORANGE', here, at(26, 5, 30), at(26, 12)),
+      w('Kyla', 'YELLOW', here, at(26, 13, 30), at(26, 23)),
+      w('Åska', 'YELLOW', here, at(24, 12), at(24, 20)),
+      w('Storm', 'RED', away, at(25, 6), at(25, 20)),
+    ];
+    return smhiWarningItems(data, new Date(2026, 9, 25, 7, 30).getTime()).map(i => [i.title, i.levelCode, i.startText]);
+  })()`);
+  assert.deepEqual(result, [
+    ['Snö', 'ORANGE', 'från i morgon kl. 05:30'],
+    ['Regn', 'YELLOW', ''],
+    ['Vind', 'YELLOW', 'från kl. 08:00'],
+    ['Risk för vattenbrist', 'MESSAGE', ''],
+  ], 'more than 24 h ahead (Kyla), ended (Åska) and elsewhere (Storm) are left out');
+});
+
 test('the ski headline uses the facility grooming age when it is newer than the tracks', async () => {
   // Orsa Grönklitt 2026-10-25: Elitspåret nr 1 said 33 h, the facility 9.3 h
   const headline = (overview) => evaluate(`skiHeadline([{ status: { ageHoursOfClassicGrooming: 33, ageHoursOfSkateGrooming: 33 } }], ${JSON.stringify(overview)}).text`);
