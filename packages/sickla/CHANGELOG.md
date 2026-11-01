@@ -4,6 +4,19 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.8.1 — 2026-11-01
+
+### Fixed
+- Texts from the data sources are shown as text, never interpreted as HTML: the SMHI
+  warning title and description, the bathing card's advisories, assessment, bacteria-count
+  prefixes, algae and weather texts, and SL's deviation text. The VMA banner, the sample
+  panel, the tennis and ski sides and the departure line and destination already did this.
+  No visible change with normal data.
+
+### Tests
+- New `tests/panels.test.mjs`: mocked tests for every panel built before 1.5.0, with edge
+  cases, and a check that markup in each source above stays text.
+
 ## 1.8.0 — 2026-10-25
 
 ### Added

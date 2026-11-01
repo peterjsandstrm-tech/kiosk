@@ -856,7 +856,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -990,13 +990,13 @@ async function loadWarnings() {
     banner.innerHTML = items.map(item => {
       const info = warningLevelInfo[item.levelCode] || warningLevelInfo.MESSAGE;
       const descHtml = item.descriptionText
-        ? `<span class="w-desc">${item.descriptionText}</span>`
+        ? `<span class="w-desc">${escapeHtml(item.descriptionText)}</span>`
         : '';
       return `
         <div class="warning-item">
           <span class="warning-icon">${info.icon}</span>
           <div class="warning-text">
-            <div class="w-title">${item.title}${item.startText ? ` · ${item.startText}` : ''}</div>
+            <div class="w-title">${escapeHtml(item.title)}${item.startText ? ` · ${escapeHtml(item.startText)}` : ''}</div>
             ${descHtml}
           </div>
         </div>`;
@@ -1335,7 +1335,7 @@ async function loadBathingWater() {
     const advisories = [...(data.adviceAgainstBathing || []), ...(data.abnormalSituations || [])];
     if (advisories.length > 0) {
       advisoryBox.className = 'bathing-advisory visible';
-      advisoryBox.innerHTML = advisories.map(a => `⚠ ${a.description || a.typeIdText || 'Badförbud/varning'}`).join('<br>');
+      advisoryBox.innerHTML = advisories.map(a => `⚠ ${escapeHtml(a.description || a.typeIdText || 'Badförbud/varning')}`).join('<br>');
     } else {
       advisoryBox.className = 'bathing-advisory';
       advisoryBox.innerHTML = '';
@@ -1357,16 +1357,16 @@ async function loadBathingWater() {
         const detailHtml = (i === 0 && r.sampleAssessId === 3)
           ? `
             <div class="bathing-report-detail">
-              <div>E. coli: ${formatCount(r.escherichiaColiPrefix, r.escherichiaColiCount)} (gräns för Otjänligt: &gt;1000 CFU/100ml)</div>
-              <div>Tarmenterokocker: ${formatCount(r.intestinalEnterococciPrefix, r.intestinalEnterococciCount)} (gräns: &gt;400 CFU/100ml)</div>
-              <div>Algblomning: ${r.algalIdText}</div>
-              ${r.weatherIdText ? `<div>Väder vid provtagning: ${r.weatherIdText}</div>` : ''}
+              <div>E. coli: ${escapeHtml(formatCount(r.escherichiaColiPrefix, r.escherichiaColiCount))} (gräns för Otjänligt: &gt;1000 CFU/100ml)</div>
+              <div>Tarmenterokocker: ${escapeHtml(formatCount(r.intestinalEnterococciPrefix, r.intestinalEnterococciCount))} (gräns: &gt;400 CFU/100ml)</div>
+              <div>Algblomning: ${escapeHtml(r.algalIdText)}</div>
+              ${r.weatherIdText ? `<div>Väder vid provtagning: ${escapeHtml(r.weatherIdText)}</div>` : ''}
             </div>`
           : '';
         return `
           <div class="bathing-report-row">
-            <span class="bathing-status-badge ${bathingStatusClass(r.sampleAssessId)}">${r.sampleAssessIdText}</span>
-            <span>${dateStr}</span>
+            <span class="bathing-status-badge ${bathingStatusClass(r.sampleAssessId)}">${escapeHtml(r.sampleAssessIdText)}</span>
+            <span>${escapeHtml(dateStr)}</span>
           </div>
           ${detailHtml}`;
       }).join('');
@@ -2268,7 +2268,7 @@ function renderDepartures() {
       const timeClass = isNow ? 'now' : (past ? 'past' : '');
       const deviationText = extractDeviationText(dep.deviations);
       const deviationHtml = deviationText
-        ? `<div class="bus-deviation">⚠ ${deviationText}</div>`
+        ? `<div class="bus-deviation">⚠ ${escapeHtml(deviationText)}</div>`
         : '';
 
       const journeyState = dep.journey && dep.journey.state;

@@ -405,6 +405,20 @@ test('warnings: the banner shows the most severe colour, upcoming ones with thei
   assert.deepEqual(banner.icons, ['🟠', '⚠️']);
 });
 
+// Markup in API text must show as text: no element is created from it
+const MARKUP = '<b class="injected">x</b>';
+const injected = () => evaluate(`document.querySelectorAll('.injected').length`);
+
+test('warnings: title and description from SMHI are escaped', async () => {
+  const now = Date.now();
+  mocks.warnings = () => ok([warning(MARKUP, 'YELLOW', polygon(SICKLA), new Date(now - MIN).toISOString(), new Date(now + 60 * MIN).toISOString(),
+    { descriptions: [{ title: { code: 'INCIDENT' }, text: { sv: MARKUP } }] })]);
+  await evaluate('loadWarnings()');
+  assert.equal(await injected(), 0);
+  assert.equal(await evaluate(`document.querySelector('#warningBanner .w-title').textContent`), MARKUP);
+  assert.equal(await evaluate(`document.querySelector('#warningBanner .w-desc').textContent`), MARKUP);
+});
+
 test('warnings: an error or an empty list hides the banner', async () => {
   mocks.warnings = () => ({ status: 500, body: '' });
   await evaluate('loadWarnings()');
@@ -604,6 +618,17 @@ test('bathing card: advisories are shown at the top, with fallbacks for missing 
     '⚠ Avrådan från bad p.g.a. avloppsutsläpp<br>⚠ Algblomning<br>⚠ Badförbud/varning');
 });
 
+test('bathing card: texts from the API are escaped (advisories, assessment, counts, algae, weather)', async () => {
+  const c = await loadBathing(ok(bathing([sample(`${YEAR}-08-12`, 3, {
+    sampleAssessIdText: MARKUP, escherichiaColiPrefix: MARKUP, intestinalEnterococciPrefix: MARKUP, algalIdText: MARKUP, weatherIdText: MARKUP })], {
+    adviceAgainstBathing: [{ description: MARKUP }], abnormalSituations: [{ typeIdText: MARKUP }] })));
+  assert.equal(await injected(), 0);
+  assert.equal(c.advisory, `⚠ ${MARKUP}⚠ ${MARKUP}`);
+  assert.equal(c.badges[0][0], MARKUP);
+  assert.equal(c.detail.split(MARKUP).length - 1, 4, 'both prefixes, algae and weather shown as text');
+  await loadBathing(ok(BATHING_DEFAULT));
+});
+
 test('bathing card: no samples and no classification', async () => {
   const c = await loadBathing(ok({ results: [], profile: {} }));
   assert.equal(c.temp, '–°');
@@ -726,6 +751,15 @@ test('departures: "Nu", "Avgick", minutes, "ca" for timetable times, moving dot,
   assert.equal(expected.moving, false, 'no dot before the vehicle is tracked');
   assert.equal(expected.deviation, '⚠ Inställd hållplats · Försenad', 'a list of deviations');
   assert.equal(by('25M', 'Saltsjöbaden').deviation, '⚠ Buss ersätter', 'an object deviation');
+});
+
+test('departures: deviation text, line and destination from SL are escaped', async () => {
+  mocks.sl = () => ok({ departures: [dep(5, MARKUP, MARKUP, 'BUS', { deviations: [{ message: MARKUP }] })] });
+  const list = await refresh();
+  assert.equal(await injected(), 0);
+  assert.deepEqual([list[0].line, list[0].dest, list[0].deviation], [MARKUP, MARKUP, `⚠ ${MARKUP}`]);
+  mocks.sl = DEFAULT_MOCKS.sl;
+  await refresh();
 });
 
 test('departures: deviation text from every format SL uses', async () => {
