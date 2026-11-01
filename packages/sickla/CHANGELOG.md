@@ -4,6 +4,28 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.9.0 — 2026-11-01
+
+### Changed
+- The ski card lists only tracks groomed within the last 72 hours (covers Skidspår.se's
+  "2 dagar sedan"), most recently groomed first, five at most, natural-snow tracks included.
+  Without any, the card says "Inga spår preparerade senaste 3 dygnen · tryck för alla N".
+  The panel opened with a tap still lists every track. The headline now considers all tracks.
+- Fixed page height: the page fills the screen and the sources line always sits at the
+  bottom. The departures card takes the space left over (at least 220 px; on a very small
+  screen the whole page scrolls instead) and scrolls inside itself when the departures do not
+  fit. The bottom edge fades out while more departures lie below, and the list returns to the
+  nearest departures 2 minutes after the last scroll.
+- The ski and bathing panels no longer take their height from the departures card. They run
+  from the top of the weather card down to at most 24 px above the bottom of the screen, and
+  shrink to fit a short list.
+
+### Tests
+- Card tests updated for the 72-hour filter; new test that the ski panel height does not
+  follow the departures card.
+- New tests: with many departures the page does not grow and the list scrolls inside its
+  card; with few the sources line stays at the bottom of the screen.
+
 ## 1.8.1 — 2026-11-01
 
 ### Fixed

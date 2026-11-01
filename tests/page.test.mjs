@@ -394,41 +394,35 @@ test('ski list: all 18 facilities, nearest to Sickla first', async () => {
   assert.deepEqual(names.slice(-3), ['Lundåsvallen, Häverödal', 'Engelbrektsspåret i Norberg', 'Orsa Grönklitt']);
 });
 
-test('choosing Hellasgården shows its natural-snow tracks without a report', async () => {
+test('choosing Hellasgården without a report lists no tracks on the card, only a hint', async () => {
   await chooseSki(48);
   assert.ok(await waitFor(`document.getElementById('skiSelect').value === '48' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
   const t = await skiText();
   assert.equal(t.headlineClass, 'ski-headline');
-  assert.equal(t.tracks.length, 5);
-  assert.equal(t.more, '+1 spår till · tryck för alla');
+  assert.equal(t.tracks.length, 0, 'ungroomed tracks are left out of the card');
+  assert.equal(t.more, 'Inga spår preparerade senaste 3 dygnen · tryck för alla 6');
   assert.match(t.facts, /natursnö/);
-  assert.match(t.tracks[0], /Klassiskt: –/);
 });
 
 test('Norberg shows all its tracks, natural snow included, and the mixed snow in the facts', async () => {
   await chooseSki(426);
   assert.ok(await waitFor(`document.getElementById('skiSelect').value === '426' && /Ingen aktuell/.test(document.getElementById('skiHeadline').textContent)`));
   const t = await skiText();
-  assert.equal(t.tracks.length, 5);
-  assert.equal(t.more, '');
-  assert.ok(t.tracks.some(x => /^Engelbrektsspåret 27 km/.test(x)), 'the natural-snow Engelbrektsspåret is shown');
-  assert.ok(t.tracks.some(x => /^Håberget 9 km/.test(x)));
+  assert.equal(t.tracks.length, 0);
+  assert.equal(t.more, 'Inga spår preparerade senaste 3 dygnen · tryck för alla 5');
   assert.equal(t.facts, '51,3\u00a0km, varav 15,3\u00a0km konstsnö · elljus · spåravgift');
 });
 
-test('Orsa Grönklitt shows the most recently groomed of its 31 tracks first, five at most', async () => {
+test('Orsa Grönklitt shows only the tracks groomed within 72 h, most recent first', async () => {
   await chooseSki(495);
   assert.ok(await waitFor(`document.getElementById('skiSelect').value === '495' && /Spårat/.test(document.getElementById('skiHeadline').textContent)`));
   const t = await skiText();
   assert.equal(t.headline, 'Spårat för ca 3\u00a0h sedan');
-  assert.equal(t.tracks.length, 5);
-  assert.equal(t.more, '+26 spår till · tryck för alla');
+  assert.equal(t.tracks.length, 3, 'the 28 ungroomed tracks are left out');
+  assert.equal(t.more, '+28 spår till · tryck för alla');
   assert.match(t.tracks[0], /^Böllingmyren, nr 14 11 km Klassiskt: Idag \(Riktigt bra\) · Skate: Idag \(Bra\)/);
   assert.match(t.tracks[1], /^Elitspåret, nr 6 10 km Klassiskt: Igår \(Ganska bra\) · Skate: Igår$/);
   assert.match(t.tracks[2], /^Vägspåren, nr 19 39 km Klassiskt: 2 dagar sedan/);
-  // Ungroomed tracks keep the facility's order
-  assert.match(t.tracks[3], /^Elitspåret, nr 1 1,5 km/);
-  assert.match(t.tracks[4], /^Elitspåret, nr 2 2,5 km/);
   assert.match(t.facts, /km, varav .* konstsnö · elljus · spåravgift$/);
 });
 
@@ -492,8 +486,23 @@ test('tapping the ski side opens a panel with all tracks, most recently groomed 
   // A tap outside closes it too
   await tap('#skiHeadline');
   assert.equal(await skiOverlayOpen(), true);
-  await tap('.footer-note');
+  await tap('h1');
   assert.equal(await skiOverlayOpen(), false);
+});
+
+test('the ski panel height does not follow the departures card', async () => {
+  const panelHeight = (busMinHeight) => evaluate(`(() => {
+    document.getElementById('busCard').style.minHeight = '${busMinHeight}';
+    openSkiOverlay();
+    const h = document.getElementById('skiOverlay').getBoundingClientRect();
+    closeSkiOverlay();
+    return { height: Math.round(h.height), bottom: Math.round(h.bottom), viewport: window.innerHeight };
+  })()`);
+  const small = await panelHeight('0px');
+  const large = await panelHeight('500px');
+  await evaluate(`document.getElementById('busCard').style.minHeight = ''`);
+  assert.equal(small.height, large.height);
+  assert.ok(small.bottom <= small.viewport - 24, 'the panel stops above the bottom edge of the screen');
 });
 
 test('the ski panel also lists the natural-snow tracks the card leaves out', async () => {
@@ -502,7 +511,7 @@ test('the ski panel also lists the natural-snow tracks the card leaves out', asy
   const t = await skiText();
   const all = await evaluate(`skiAllTracks(skiState[18].data).length`);
   assert.ok(all > t.tracks.length, 'Ågesta has more tracks than the card shows');
-  assert.equal(t.more, `+${all - t.tracks.length} spår till · tryck för alla`);
+  assert.equal(t.more, `Inga spår preparerade senaste 3 dygnen · tryck för alla ${all}`);
   await tap('#skiHeadline');
   assert.equal(await evaluate(`document.querySelectorAll('#skiOverlayList .ski-overlay-track').length`), all);
   await tap('#skiOverlayClose');
@@ -550,4 +559,36 @@ test('swiping wraps around: ski → bathing → ski', async () => {
 
 test('no JavaScript exceptions on the page', () => {
   assert.deepEqual(exceptions, []);
+});
+
+test('many departures: the page keeps the screen height, the list scrolls inside its card', async () => {
+  const m = await evaluate(`(() => {
+    const list = document.getElementById('busList');
+    const saved = list.innerHTML;
+    list.innerHTML = Array.from({ length: 40 }, (_, i) => '<li class="bus-item"><div class="bus-main-row">Avgång ' + i + '</div></li>').join('');
+    updateBusListFade();
+    const footer = [...document.querySelectorAll('.footer-note')].pop().getBoundingClientRect();
+    const r = {
+      pageScrolls: document.scrollingElement.scrollHeight > window.innerHeight,
+      listScrolls: list.scrollHeight > list.clientHeight,
+      footerVisible: footer.bottom <= window.innerHeight,
+      fade: list.classList.contains('more-below'),
+    };
+    list.scrollTop = list.scrollHeight;
+    updateBusListFade();
+    r.fadeAtEnd = list.classList.contains('more-below');
+    list.innerHTML = saved;
+    list.scrollTop = 0;
+    updateBusListFade();
+    return r;
+  })()`);
+  assert.deepEqual(m, { pageScrolls: false, listScrolls: true, footerVisible: true, fade: true, fadeAtEnd: false });
+});
+
+test('few departures: the sources line still sits at the bottom of the screen', async () => {
+  const gap = await evaluate(`(() => {
+    const footer = [...document.querySelectorAll('.footer-note')].pop().getBoundingClientRect();
+    return window.innerHeight - footer.bottom;
+  })()`);
+  assert.ok(gap < 60, `footer ends ${gap}px above the bottom edge`);
 });

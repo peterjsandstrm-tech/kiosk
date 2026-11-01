@@ -16,9 +16,13 @@
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
+  /* Fast höjd: sidan fyller skärmen och källraden står alltid längst ner.
+     Avgångsrutan tar det utrymme som blir över och skrollar inuti sig själv
+     när avgångarna inte får plats. */
   body {
     margin: 0;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: linear-gradient(160deg, var(--bg1), var(--bg2) 60%, #12203f);
     background-attachment: fixed;
@@ -33,6 +37,14 @@
     display: flex;
     flex-direction: column;
     gap: clamp(16px, 2.5vw, 24px);
+  }
+  .wrap > * { flex-shrink: 0; }
+  #busCard {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    min-height: 220px; /* på en liten skärm skrollar hela sidan i stället */
+    margin-bottom: auto; /* källraden längst ner även med få avgångar */
   }
   .card {
     background: var(--card);
@@ -515,6 +527,16 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .bus-list > * { flex-shrink: 0; }
+  /* Tonar ut nederkanten när fler avgångar finns längre ner */
+  .bus-list.more-below {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
   }
   .bus-item {
     display: flex;
@@ -704,7 +726,8 @@
     margin-bottom: 10px;
   }
   .bo-list {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -856,7 +879,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.9.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1472,13 +1495,15 @@ function renderBathingOverlay() {
   }).join('');
 }
 
+// Från väderrutans överkant och högst ner till skärmens nederkant (24 px
+// marginal). Rutan blir så hög som innehållet kräver; den hängde tidigare
+// ihop med avgångsrutans höjd och varierade med antalet avgångar.
+const OVERLAY_BOTTOM_MARGIN = 24;
 function positionBathingOverlay(overlay = document.getElementById('bathingOverlay')) {
   const topRow = document.querySelector('.top-row');
-  const busCard = document.getElementById('busCard');
-  // Från väderrutans överkant ner över största delen av avgångsrutan
-  const extra = Math.max(240, Math.round(busCard.offsetHeight * 0.85));
   overlay.style.top = `${topRow.offsetTop}px`;
-  overlay.style.height = `${busCard.offsetTop - topRow.offsetTop + Math.min(extra, busCard.offsetHeight)}px`;
+  overlay.style.height = '';
+  overlay.style.maxHeight = `${Math.max(240, window.innerHeight - topRow.getBoundingClientRect().top - OVERLAY_BOTTOM_MARGIN)}px`;
 }
 
 function openBathingOverlay() {
@@ -1773,7 +1798,7 @@ function skiTick() {
   renderSki();
 }
 
-// Spåren som visas: konstsnöspåren om anläggningen har några, annars alla.
+// Spåren som faktaraden räknar på: konstsnöspåren om anläggningen har några, annars alla.
 // För anläggningar med allTracks visas alla spår, senast preparerade först
 // (sorteringen är stabil, så opreparerade spår behåller anläggningens ordning).
 function skiShownTracks(data, facility) {
@@ -1781,6 +1806,13 @@ function skiShownTracks(data, facility) {
   if (facility?.allTracks) return skiAllTracks(data);
   const artificial = active.filter(t => t.properties?.isartificialsnow);
   return artificial.length ? artificial : active;
+}
+
+// Kortet visar bara spår preparerade inom 72 h (täcker Skidspår.se:s
+// "2 dagar sedan"); alla spår finns i rutan som öppnas med ett tryck
+const SKI_CARD_MAX_AGE_HOURS = 72;
+function skiRecentTracks(data) {
+  return skiAllTracks(data).filter(t => skiGroomedRank(t) <= SKI_CARD_MAX_AGE_HOURS);
 }
 
 // Alla aktiva spår, senast preparerade först (rutan som öppnas med ett tryck)
@@ -1883,20 +1915,24 @@ function renderSki() {
   }
 
   const tracks = skiShownTracks(data, SKI_FACILITIES.find(f => f.id === skiFacilityId));
-  const headline = skiHeadline(tracks, data.trackOverview);
+  const all = skiAllTracks(data);
+  const headline = skiHeadline(all, data.trackOverview);
   headlineEl.className = `ski-headline ${headline.cls}`.trim();
   headlineEl.textContent = headline.text;
 
-  // Högst fem spår på kortet; resten (även natursnöspår som kortet hoppar
-  // över) finns i rutan som öppnas med ett tryck
+  // Högst fem nyligen preparerade spår på kortet, senast preparerade först;
+  // alla spår finns i rutan som öppnas med ett tryck
   const MAX_TRACKS = 5;
-  const shown = tracks.slice(0, MAX_TRACKS);
-  const hidden = skiAllTracks(data).length - shown.length;
+  const shown = skiRecentTracks(data).slice(0, MAX_TRACKS);
+  const hidden = all.length - shown.length;
+  const more = !hidden ? ''
+    : shown.length ? `+${hidden} spår till · tryck för alla`
+    : `Inga spår preparerade senaste 3 dygnen · tryck för alla ${hidden}`;
   tracksEl.innerHTML = shown.map(t => `
     <div class="ski-track">
       <div class="ski-track-name">${escapeHtml(t.name || 'Slinga')} ${formatKm(t.tracklength || 0)}</div>
       <div class="ski-track-status">${escapeHtml(skiTrackStatus(t))}</div>
-    </div>`).join('') + (hidden > 0 ? `<div class="ski-track-status">+${hidden} spår till · tryck för alla</div>` : '');
+    </div>`).join('') + (more ? `<div class="ski-track-status">${more}</div>` : '');
 
   factsEl.textContent = skiFacts(tracks);
 
@@ -2227,7 +2263,29 @@ let departuresTimer = null;
 let departuresNextFetchAt = 0;   // när nästa hämtning är planerad
 let departuresInFlight = 0;      // antal pågående hämtningar
 
+// Avgångslistan skrollar inuti rutan. Nederkanten tonas ut när fler avgångar
+// finns längre ner, och 2 minuter efter senaste skrollning går listan tillbaka
+// till de närmaste avgångarna.
+const BUS_SCROLL_RESET_MS = 2 * 60 * 1000;
+let busScrollResetTimer = null;
+function updateBusListFade() {
+  const list = document.getElementById('busList');
+  list.classList.toggle('more-below', list.scrollTop + list.clientHeight < list.scrollHeight - 2);
+}
+document.getElementById('busList').addEventListener('scroll', () => {
+  updateBusListFade();
+  clearTimeout(busScrollResetTimer);
+  const list = document.getElementById('busList');
+  if (list.scrollTop > 0) busScrollResetTimer = setTimeout(() => { list.scrollTop = 0; }, BUS_SCROLL_RESET_MS);
+}, { passive: true });
+window.addEventListener('resize', updateBusListFade);
+
 function renderDepartures() {
+  renderDeparturesList();
+  updateBusListFade();
+}
+
+function renderDeparturesList() {
   const list = document.getElementById('busList');
   const nowMs = Date.now();
   const failingLong = departuresFailingSince && nowMs - departuresFailingSince >= DEPARTURES_STALE_MS;
