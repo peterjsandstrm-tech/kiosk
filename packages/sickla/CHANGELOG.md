@@ -4,6 +4,15 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.10.0 — 2026-11-07
+
+### Added
+- Demo mode for the VMA banner: opening the page with `?vma=demo` shows two made-up messages,
+  labelled "🧪 TEST", one for Sickla and one for the rest of Stockholm County, so the banner can
+  be checked on the tablet. Krisinformation.se no longer offers test messages (`/v3/testvmas`
+  answers 404). Real VMA are still fetched and shown alongside. Without the parameter the page
+  behaves as before, and an automatic reload for a new version ends the demo.
+
 ## 1.9.1 — 2026-11-07
 
 ### Fixed

@@ -977,6 +977,79 @@ test('departures: the watchdog restarts a lost timer, but not while a fetch is r
   assert.equal(await nextFetchIn(), 30);
 });
 
+// ---------- VMA demo mode (?vma=demo) ----------
+test('VMA demo: ?vma=demo shows two TEST messages, Sickla first, with no real VMA active', async () => {
+  mocks.vma = () => ok([]);
+  await load(`${pageUrl}?vma=demo`);
+  assert.ok(await waitFor(`document.getElementById('vmaBanner').classList.contains('visible')`), 'banner shown');
+  const items = await vmaItems();
+  assert.equal(items.length, 2);
+  assert.deepEqual(items.map(i => i.label), ['🧪 TEST · Gäller Sickla', '🧪 TEST · Stockholms län']);
+  assert.deepEqual(items.map(i => i.area), ['Område: Nacka kommun', 'Område: Norrtälje kommun']);
+  for (const i of items) {
+    assert.match(i.headline, /^TEST – /);
+    assert.match(i.text, /inget riktigt VMA/);
+    assert.match(i.time, /^Utfärdat .* · Kiosk Sickla \(demo\)$/);
+  }
+  assert.ok(countRequests('vma') > 0, 'real VMA are still fetched');
+});
+
+test('VMA demo: real messages come first, test messages from the API stay hidden', async () => {
+  mocks.vma = () => ok([
+    { Headline: 'Brand i Sickla', Published: '2026-11-01T07:00:00+01:00', Preamble: 'Gå inomhus.', Area: [vmaArea('Nacka kommun', polygon(SICKLA, 0.05))] },
+    { Headline: 'Störning i dricksvattnet', Published: '2026-11-01T08:30:00+01:00', Area: [{ Description: 'Stockholms län' }] },
+    { Headline: 'Test av VMA', IsTest: true, Published: '2026-11-01T09:00:00+01:00', Area: [vmaArea('Nacka kommun', polygon(SICKLA, 0.1))] },
+    { Headline: 'Gasutsläpp i Göteborg', Published: '2026-11-01T09:00:00+01:00', Area: [vmaArea('Göteborgs kommun', polygon([11.97, 57.7], 0.2))] },
+  ]);
+  await evaluate('loadVma()');
+  const items = await vmaItems();
+  assert.deepEqual(items.map(i => i.label), ['📢 VMA · Gäller Sickla', '📢 VMA · Stockholms län', '🧪 TEST · Gäller Sickla', '🧪 TEST · Stockholms län']);
+  assert.deepEqual(items.slice(0, 2).map(i => i.headline), ['Brand i Sickla', 'Störning i dricksvattnet']);
+});
+
+test('VMA demo: an error or an unexpected answer keeps the last real messages and the demo', async () => {
+  mocks.vma = () => ({ status: 500, body: '{}' });
+  await evaluate('loadVma()');
+  assert.equal((await vmaItems()).length, 4, 'HTTP 500');
+  mocks.vma = () => ok({ message: 'not a list' });
+  await evaluate('loadVma()');
+  assert.equal((await vmaItems()).length, 4, 'not a list');
+  mocks.vma = () => ok([]);
+  await evaluate('loadVma()');
+  assert.deepEqual((await vmaItems()).map(i => i.label), ['🧪 TEST · Gäller Sickla', '🧪 TEST · Stockholms län'], 'an empty answer leaves only the demo');
+});
+
+test('VMA demo: the demo shows even when the first fetch fails', async () => {
+  mocks.vma = () => ({ fail: true });
+  await load(`${pageUrl}?vma=demo`);
+  assert.ok(await waitFor(`document.querySelectorAll('#vmaBanner .vma-item').length === 2`), 'demo shown without any answer');
+  mocks.vma = () => ok([]);
+});
+
+test('VMA demo: a reload for a new version ends the demo', async () => {
+  await load(`${pageUrl}?vma=demo`);
+  assert.ok(await waitFor(`document.querySelectorAll('#vmaBanner .vma-item').length === 2`));
+  mocks.version = () => ok({ version: '99.0.0' });
+  evaluate('checkForNewVersion()').catch(() => {}); // the context goes away during the reload
+  assert.ok(await waitFor(`location.search === '?v=99.0.0' && document.readyState === 'complete'`), 'reloaded without ?vma=demo');
+  mocks.version = DEFAULT_MOCKS.version;
+  await sleep(300);
+  assert.equal(await visible('vmaBanner'), false);
+  assert.equal(await text('vmaBanner'), '');
+});
+
+test('VMA demo: only ?vma=demo starts it; without it or with another value there is no banner', async () => {
+  for (const query of ['', '?vma=Demo', '?vma=1', '?vma=', '?demo=vma']) {
+    await load(`${pageUrl}${query}`);
+    await sleep(200);
+    assert.equal(await visible('vmaBanner'), false, `no banner for "${query}"`);
+    assert.equal(await evaluate('VMA_DEMO'), false, `no demo for "${query}"`);
+  }
+  await load(`${pageUrl}?v=1.0.0&vma=demo`);
+  assert.equal(await evaluate('VMA_DEMO'), true, 'other parameters do not matter');
+  await load();
+});
+
 // ---------- Whole page ----------
 test('all requests to other hosts were answered by the mocks', () => {
   assert.deepEqual(unmocked, []);

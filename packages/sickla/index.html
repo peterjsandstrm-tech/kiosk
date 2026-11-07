@@ -879,7 +879,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.9.1';
+const APP_VERSION = '1.10.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1040,6 +1040,24 @@ setInterval(loadWarnings, 15 * 60 * 1000); // varningar uppdateras inte superfre
 const VMA_URL = 'https://api.krisinformation.se/v3/vmas';
 const VMA_REFRESH_MS = 60 * 1000;
 
+// Demoläge: med ?vma=demo i adressen visas två påhittade VMA, tydligt märkta TEST,
+// i den riktiga bannern, så att den kan provas på plattan. Krisinformation har inget
+// testflöde längre (/v3/testvmas ger 404). Riktiga VMA hämtas och visas som vanligt.
+// En automatisk omladdning vid ny version tar bort parametern och avslutar demoläget.
+const VMA_DEMO = new URLSearchParams(location.search).get('vma') === 'demo';
+function vmaDemoMessages(now = new Date()) {
+  const square = (lon, lat, d) => ({ type: 'Polygon', coordinates: [[[lon - d, lat - d], [lon + d, lat - d], [lon + d, lat + d], [lon - d, lat + d], [lon - d, lat - d]]] });
+  const area = (Description, Geometry, PoleOfInInaccessibility) => ({ Description, GeometryInformation: { Geometry, PoleOfInInaccessibility } });
+  const text = 'Detta är inget riktigt VMA. Demoläge: ta bort ?vma=demo ur adressen för att avsluta.';
+  return [
+    { demo: true, Headline: 'TEST – så ser ett VMA för Sickla ut', Preamble: text, SenderName: 'Kiosk Sickla (demo)',
+      Published: now.toISOString(), Area: [area('Nacka kommun', square(SICKLA_LON, SICKLA_LAT, 0.05))] },
+    { demo: true, Headline: 'TEST – så ser ett VMA för resten av länet ut', Preamble: text, SenderName: 'Kiosk Sickla (demo)',
+      Published: new Date(now.getTime() - 60 * 1000).toISOString(), Area: [area('Norrtälje kommun', null, { type: 'Point', coordinates: [18.70, 59.76] })] },
+  ];
+}
+let vmaLastData = [];
+
 // Förenklad kontur av Stockholms län [lon, lat] (Douglas–Peucker, ca 1 km),
 // härledd från länets polygon i Krisinformations test-VMA. Kustlinjen är grov,
 // så ett område räknas också till länet om namnet nämner Stockholm.
@@ -1081,8 +1099,16 @@ function vmaAreaRelevance(area) {
 async function loadVma() {
   const banner = document.getElementById('vmaBanner');
   try {
-    const data = await fetchJSON(VMA_URL);
-    if (!Array.isArray(data)) throw new Error('Oväntat svar');
+    let data;
+    try {
+      data = await fetchJSON(VMA_URL);
+      if (!Array.isArray(data)) throw new Error('Oväntat svar');
+      vmaLastData = data;
+    } catch (e) {
+      if (!VMA_DEMO) throw e;
+      data = vmaLastData; // demon visas även när Krisinformation inte svarar
+    }
+    if (VMA_DEMO) data = data.concat(vmaDemoMessages());
 
     const items = [];
     for (const vma of data) {
@@ -1100,13 +1126,13 @@ async function loadVma() {
       return;
     }
 
-    // VMA som gäller Sickla först, därefter senast publicerade
-    items.sort((a, b) => (b.affectsSickla - a.affectsSickla) ||
+    // Riktiga VMA före demomeddelanden, därefter de som gäller Sickla, sist senast publicerade
+    items.sort((a, b) => (!!a.vma.demo - !!b.vma.demo) || (b.affectsSickla - a.affectsSickla) ||
       (new Date(b.vma.Published) - new Date(a.vma.Published)));
 
     banner.className = 'vma-banner visible';
     banner.innerHTML = items.map(({ vma, affectsSickla, areaNames }) => {
-      const label = affectsSickla ? '📢 VMA · Gäller Sickla' : '📢 VMA · Stockholms län';
+      const label = (vma.demo ? '🧪 TEST · ' : '📢 VMA · ') + (affectsSickla ? 'Gäller Sickla' : 'Stockholms län');
       const areaText = areaNames.length ? `Område: ${areaNames.join(', ')}` : '';
       const text = vma.Preamble || vma.PushMessage || vma.BodyText || '';
       const published = vma.Published
