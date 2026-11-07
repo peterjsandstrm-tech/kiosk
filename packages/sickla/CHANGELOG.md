@@ -4,6 +4,14 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.9.1 — 2026-11-07
+
+### Fixed
+- Track ratings are shown again after the grooming text, e.g. "Klassiskt: Idag (Bra)".
+  Skidspår.se sends the rating as an average such as 3.43, which never matched the exact
+  half-steps of the rating labels, so the rating was silently dropped. The value is now
+  rounded to the nearest half-step between 0.5 and 5 before the lookup.
+
 ## 1.9.0 — 2026-11-01
 
 ### Changed

@@ -47,8 +47,12 @@ function mockWeek(offset) {
 // hand-edited as groomed: Böllingmyren nr 14 (3 h), Elitspåret nr 6 (30 h), Vägspåren nr 19 (50 h, classic only).
 const SKI_FIXTURES = { 1655: 'skidspar-facility-1655-groomed.json', 48: 'skidspar-facility-48.json', 18: 'skidspar-facility-18.json', 2182: 'skidspar-facility-1655.json',
   426: 'skidspar-facility-426.json', 495: 'skidspar-facility-495-groomed.json' };
+// Orsa Grönklitt (495) as captured live on 2026-11-07 at 11:26, the first real grooming report:
+// two tracks groomed today with ratings sent as averages (3.433…, 0.666…, 4.218…).
+const SKI_LIVE_495 = 'skidspar-facility-495-2026-11-07.json';
 
 let tennisMode = 'ok';
+let skiLive495 = false;
 let tennisRequests = 0;
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -61,7 +65,8 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (url.pathname.startsWith('/ski/')) {
-    const file = SKI_FIXTURES[url.pathname.slice(5)];
+    const id = url.pathname.slice(5);
+    const file = id === '495' && skiLive495 ? SKI_LIVE_495 : SKI_FIXTURES[id];
     const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
     if (!file) { res.writeHead(404, headers); res.end('{}'); return; }
     // The groomed Saltsjöbaden answer gets today's date on its notice, so it
@@ -424,6 +429,79 @@ test('Orsa Grönklitt shows only the tracks groomed within 72 h, most recent fir
   assert.match(t.tracks[1], /^Elitspåret, nr 6 10 km Klassiskt: Igår \(Ganska bra\) · Skate: Igår$/);
   assert.match(t.tracks[2], /^Vägspåren, nr 19 39 km Klassiskt: 2 dagar sedan/);
   assert.match(t.facts, /km, varav .* konstsnö · elljus · spåravgift$/);
+});
+
+test('Orsa Grönklitt with the live report of 2026-11-07: ratings on the card and in the panel', async () => {
+  skiLive495 = true;
+  try {
+    await evaluate(`loadSki(495)`);
+    assert.ok(await waitFor(`/Multibanan/.test(document.getElementById('skiTracks').textContent)`));
+    const t = await skiText();
+    assert.equal(t.headline, 'Spårat för ca 5\u00a0h sedan');
+    assert.equal(t.tracks.length, 2, 'only the two groomed tracks are on the card');
+    assert.match(t.tracks[0], /^Elitspåret, nr 1 1,5 km Klassiskt: Idag \(Bra\) · Skate: Idag \(Inte bra\)$/);
+    assert.match(t.tracks[1], /^Multibanan, nr 11 5 km Klassiskt: Idag \(Riktigt bra\) · Skate: Idag \(Riktigt bra\)$/);
+    assert.equal(t.more, '+29 spår till · tryck för alla');
+    await tap('#skiHeadline');
+    assert.ok(await skiOverlayOpen());
+    const panel = await evaluate(`[...document.querySelectorAll('#skiOverlayList .ski-overlay-track')]
+      .map(e => e.textContent.replace(/\\s+/g, ' ').trim())`);
+    assert.equal(panel.length, 31);
+    assert.match(panel[0], /^Elitspåret, nr 1 1,5 km Klassiskt: Idag \(Bra\) · Skate: Idag \(Inte bra\)/);
+    assert.match(panel[1], /^Multibanan, nr 11 5 km Klassiskt: Idag \(Riktigt bra\) · Skate: Idag \(Riktigt bra\)/);
+    // Ungroomed tracks have quality 0 in the live answer; names may contain parentheses.
+    const rated = panel.slice(2).filter(line => /(Klassiskt|Skate): [^·(]*\(/.test(line));
+    assert.deepEqual(rated, [], 'ungroomed tracks carry no rating');
+    assert.ok(panel.some(line => line.startsWith('Blåbärsslingan (Skidstadion), nr 7')), 'names with parentheses are kept');
+  } finally {
+    if (await skiOverlayOpen()) await tap('#skiOverlayClose');
+    skiLive495 = false;
+    await evaluate(`loadSki(495)`);
+    await waitFor(`/Böllingmyren/.test(document.getElementById('skiTracks').textContent)`);
+  }
+});
+
+test('ski ratings sent as averages are rounded to the nearest half-step', async () => {
+  // Live values from Skidspår.se for Orsa Grönklitt on 2026-11-07.
+  const r = await evaluate(`(() => {
+    const track = (classicQuality, skateQuality, props = { hastracksforclassic: true, hastracksforskate: true }) => skiTrackStatus({
+      properties: props,
+      status: { lastGroomedClassic: 'today', lastGroomedSkate: 'today', classicQuality, skateQuality },
+    });
+    return {
+      elit: track(3.4330529653532587, 0.6666602024099311),
+      multi: track(4.2187960739939525, 4.2187960739939525),
+      none: track(0, undefined),
+      nullish: track(null, -1),
+      junk: track('3.5', NaN),
+      infinite: track(Infinity, -Infinity),
+      classicOnly: track(3.6, 4.9, { hastracksforclassic: true }),
+      noStatus: skiTrackStatus({ properties: { hastracksforclassic: true } }),
+      noProps: skiTrackStatus({ status: { classicQuality: 4 } }),
+    };
+  })()`);
+  assert.equal(r.elit, 'Klassiskt: Idag (Bra) · Skate: Idag (Inte bra)');
+  assert.equal(r.multi, 'Klassiskt: Idag (Riktigt bra) · Skate: Idag (Riktigt bra)');
+  assert.equal(r.none, 'Klassiskt: Idag · Skate: Idag', 'no rating (0 or missing) gives no parenthesis');
+  assert.equal(r.nullish, 'Klassiskt: Idag · Skate: Idag', 'null and negative give no rating');
+  assert.equal(r.junk, 'Klassiskt: Idag · Skate: Idag', 'strings and NaN are ignored');
+  assert.equal(r.infinite, 'Klassiskt: Idag · Skate: Idag', 'infinite values are ignored');
+  assert.equal(r.classicOnly, 'Klassiskt: Idag (Bra)', 'a classic-only track shows no skate part');
+  assert.equal(r.noStatus, 'Klassiskt: –', 'a track without status shows a dash and no rating');
+  assert.equal(r.noProps, '', 'a track without classic or skate shows nothing');
+
+  // Rounding boundaries and the clamp to 0.5–5.
+  const steps = await evaluate(`[0.01, 0.24, 0.5, 0.7499, 0.75, 1, 2.2499, 2.25, 3.25, 3.7499, 4.7499, 4.75, 5, 5.4, 9]
+    .map(q => [q, skiQualityStep(q)])`);
+  assert.deepEqual(Object.fromEntries(steps), {
+    0.01: 0.5, 0.24: 0.5, 0.5: 0.5, 0.7499: 0.5, 0.75: 1, 1: 1, 2.2499: 2, 2.25: 2.5,
+    3.25: 3.5, 3.7499: 3.5, 4.7499: 4.5, 4.75: 5, 5: 5, 5.4: 5, 9: 5,
+  });
+  // Every exact half-step keeps its own label, so the hand-made fixtures read as before.
+  const labels = await evaluate(`Object.keys(SKI_QUALITY_LABELS).map(Number)
+    .map(q => [q, SKI_QUALITY_LABELS[skiQualityStep(q)] === SKI_QUALITY_LABELS[q]])`);
+  assert.equal(labels.length, 10);
+  for (const [q, same] of labels) assert.ok(same, `half-step ${q} keeps its label`);
 });
 
 test('SMHI warnings: current ones plus those starting within 24 hours, with the start time', async () => {
