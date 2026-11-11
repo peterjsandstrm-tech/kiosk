@@ -694,6 +694,18 @@ test('weather edge cases: the row is redrawn from the last forecast, and an erro
   assert.ok(await evaluate(`Array.isArray(forecastSeries) && forecastSeries.length === 48`));
 });
 
+test('weather: forecast icons are 1.4rem, larger than the hour and temperature text', async () => {
+  await evaluate('loadWeather()');
+  const r = await evaluate(`(() => {
+    const root = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const it = document.querySelector('#forecastRow .forecast-item');
+    const px = (sel) => parseFloat(getComputedStyle(it.querySelector(sel)).fontSize);
+    return { icon: px('.fc-icon') / root, time: px('.fc-time') / root, temp: px('.fc-temp') / root };
+  })()`);
+  assert.equal(r.icon, 1.4);
+  assert.ok(r.icon > r.temp && r.icon > r.time, JSON.stringify(r));
+});
+
 test('weather edge cases: the marked row fits and stays aligned in landscape and with a dash', async () => {
   const check = () => evaluate(`(() => {
     const items = [...document.querySelectorAll('#forecastRow .forecast-item')];

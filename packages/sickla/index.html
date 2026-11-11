@@ -476,7 +476,7 @@
   /* Med "i morgon" på raden får alla klockslag samma bredd, så avstånden blir jämna */
   .forecast-row.has-tomorrow .forecast-item { width: 2.6rem; }
   .forecast-item .fc-icon {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     line-height: 1;
     min-height: 1em; /* tom ikon (saknad prognos) ska inte flytta upp temperaturen */
   }
@@ -890,7 +890,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.11.0';
+const APP_VERSION = '1.11.1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk

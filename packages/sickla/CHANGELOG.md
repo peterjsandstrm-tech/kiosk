@@ -4,6 +4,12 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.11.1 — 2026-11-11
+
+### Changed
+- The weather icons in the forecast row (09 · 13 · 17 · 21) are slightly larger: 1.4rem instead
+  of 1.1rem.
+
 ## 1.11.0 — 2026-11-11
 
 ### Added
