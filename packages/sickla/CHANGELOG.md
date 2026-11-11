@@ -4,6 +4,23 @@ All notable changes to the Sickla kiosk page. Versions follow `MAJOR.MINOR.PATCH
 MAJOR for a reworked layout, MINOR for new features, PATCH for small fixes.
 Each release is tagged `sickla-v<version>` in git.
 
+## 1.11.0 — 2026-11-11
+
+### Added
+- The forecast row (09 · 13 · 17 · 21) marks times that show tomorrow with a small "i morgon"
+  above the hour. A time switches to tomorrow once it is more than 30 minutes past, so from
+  09:31 the 09 slot is marked, and after 21:30 the whole row is. Times still today get an empty
+  line of the same height and every hour gets the same width, so the row stays aligned and
+  evenly spaced. Before 09:30 nothing is marked and the row looks as before.
+
+### Fixed
+- The forecast row is redrawn every minute from the last fetched forecast, not only when the
+  forecast is fetched (every 30 minutes). Before, a time could keep showing today's past value
+  for up to 30 minutes after it had switched to tomorrow, and just after midnight "i morgon"
+  would have stayed on times that are then today.
+- A forecast time with no forecast entry within 90 minutes (if SMHI's answer were too short)
+  shows "–" instead of the value of a far-off hour, possibly from the wrong day.
+
 ## 1.10.0 — 2026-11-07
 
 ### Added

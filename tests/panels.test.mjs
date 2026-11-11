@@ -487,6 +487,238 @@ test('weather: each forecast time picks today, or tomorrow once it is more than 
   assert.deepEqual(temps, expected);
 });
 
+test('weather: forecast times that show tomorrow are marked "i morgon", the others get an empty line', async () => {
+  // A fixed series from 2026-11-11 00:00 local time; the temperature encodes day and hour
+  // (1113 = the 11th at 13:00). renderForecastRow takes "now" as an argument.
+  const row = (h, m) => evaluate(`(() => {
+    const start = new Date(2026, 10, 11, 0, 0, 0, 0);
+    const series = Array.from({ length: 72 }, (_, i) => {
+      const t = new Date(start.getTime() + i * 3600000);
+      return { time: t.toISOString(), data: { air_temperature: t.getDate() * 100 + t.getHours(), symbol_code: 1 } };
+    });
+    renderForecastRow(series, [9, 13, 17, 21], new Date(2026, 10, 11, ${h}, ${m}));
+    const items = [...document.querySelectorAll('#forecastRow .forecast-item')];
+    return {
+      days: items.map(e => { const d = e.querySelector('.fc-day'); return d ? d.textContent : null; }),
+      marked: items.map(e => e.classList.contains('tomorrow')),
+      times: items.map(e => e.querySelector('.fc-time').textContent),
+      temps: items.map(e => e.querySelector('.fc-temp').textContent),
+    };
+  })()`);
+  let r = await row(8, 0);
+  assert.deepEqual(r.days, [null, null, null, null], 'before 09:30 everything is today and no extra line is added');
+  assert.deepEqual(r.temps, ['1109°', '1113°', '1117°', '1121°']);
+  r = await row(9, 30);
+  assert.deepEqual(r.days, [null, null, null, null], '09:00 still counts as today exactly 30 minutes past');
+  r = await row(9, 31);
+  assert.deepEqual(r.days, ['i morgon', '', '', ''], 'one minute later 09 shows tomorrow');
+  assert.deepEqual(r.temps, ['1209°', '1113°', '1117°', '1121°']);
+  r = await row(14, 0);
+  assert.deepEqual(r.days, ['i morgon', 'i morgon', '', '']);
+  assert.deepEqual(r.marked, [true, true, false, false]);
+  assert.deepEqual(r.times, ['09', '13', '17', '21'], 'the order stays fixed');
+  assert.deepEqual(r.temps, ['1209°', '1213°', '1117°', '1121°']);
+  r = await row(21, 31);
+  assert.deepEqual(r.days, ['i morgon', 'i morgon', 'i morgon', 'i morgon'], 'late in the evening the whole row is tomorrow');
+  assert.deepEqual(r.temps, ['1209°', '1213°', '1217°', '1221°']);
+  // Just after midnight it is a new day: nothing is marked and the row shows the new today
+  const after = await evaluate(`(() => {
+    const start = new Date(2026, 10, 11, 0, 0, 0, 0);
+    const series = Array.from({ length: 72 }, (_, i) => {
+      const t = new Date(start.getTime() + i * 3600000);
+      return { time: t.toISOString(), data: { air_temperature: t.getDate() * 100 + t.getHours(), symbol_code: 1 } };
+    });
+    renderForecastRow(series, [9, 13, 17, 21], new Date(2026, 10, 12, 0, 10));
+    return [...document.querySelectorAll('#forecastRow .forecast-item')].map(e => [e.querySelector('.fc-day')?.textContent ?? null, e.querySelector('.fc-temp').textContent]);
+  })()`);
+  assert.deepEqual(after, [[null, '1209°'], [null, '1213°'], [null, '1217°'], [null, '1221°']]);
+});
+
+test('weather: the "i morgon" line keeps all forecast times on one baseline', async () => {
+  const tops = await evaluate(`(() => {
+    const start = new Date(2026, 10, 11, 0, 0, 0, 0);
+    const series = Array.from({ length: 72 }, (_, i) => ({ time: new Date(start.getTime() + i * 3600000).toISOString(), data: { air_temperature: 5, symbol_code: 1 } }));
+    renderForecastRow(series, [9, 13, 17, 21], new Date(2026, 10, 11, 14, 0));
+    const items = [...document.querySelectorAll('#forecastRow .forecast-item')];
+    const card = document.querySelector('.weather-card').getBoundingClientRect();
+    const row = document.getElementById('forecastRow').getBoundingClientRect();
+    return {
+      time: items.map(e => Math.round(e.querySelector('.fc-time').getBoundingClientRect().top)),
+      temp: items.map(e => Math.round(e.querySelector('.fc-temp').getBoundingClientRect().top)),
+      day: items.map(e => e.querySelector('.fc-day').getBoundingClientRect().height),
+      widths: items.map(e => Math.round(e.getBoundingClientRect().width)),
+      labelFits: items.every(e => { const d = e.querySelector('.fc-day'); return d.scrollWidth <= e.getBoundingClientRect().width + 0.5; }),
+      rowRight: row.right, cardRight: card.right, rowLeft: row.left, cardLeft: card.left,
+    };
+  })()`);
+  assert.equal(new Set(tops.time).size, 1, `times aligned: ${tops.time}`);
+  assert.equal(new Set(tops.temp).size, 1, `temperatures aligned: ${tops.temp}`);
+  assert.ok(tops.day.every(h => h > 0), 'the empty line takes the same space');
+  assert.equal(new Set(tops.widths).size, 1, `all forecast times equally wide: ${tops.widths}`);
+  assert.ok(tops.labelFits, '"i morgon" fits within its column');
+  assert.ok(tops.rowRight <= tops.cardRight && tops.rowLeft >= tops.cardLeft, 'the row fits inside the weather card');
+  await evaluate('loadWeather()'); // back to the real "now"
+});
+
+// In-page forecast series in local time, one entry per `step` hours from `start`
+// (arguments to new Date(...)); the temperature encodes day and hour (1113 = the 11th
+// at 13:00) so a test can see which entry each forecast time picked.
+const seriesJs = (start, count = 72, step = 1) => `(() => {
+  const s = new Date(${start});
+  return Array.from({ length: ${count} }, (_, i) => {
+    const t = new Date(s.getTime() + i * ${step} * 3600000);
+    return { time: t.toISOString(), data: { air_temperature: t.getDate() * 100 + t.getHours(), symbol_code: 1 } };
+  });
+})()`;
+const readRow = `[...document.querySelectorAll('#forecastRow .forecast-item')].map(e => {
+  const d = e.querySelector('.fc-day');
+  return [d ? d.textContent : null, e.querySelector('.fc-time').textContent, e.querySelector('.fc-icon').textContent, e.querySelector('.fc-temp').textContent];
+})`;
+const rowAt = (start, now, count, step) =>
+  evaluate(`(() => { renderForecastRow(${seriesJs(start, count, step)}, FORECAST_HOURS, new Date(${now})); return ${readRow}; })()`);
+const days = (row) => row.map(r => r[0]);
+const temps = (row) => row.map(r => r[3]);
+const M = 'i morgon';
+
+test('weather edge cases: the 30-minute boundary is exact to the millisecond', async () => {
+  const start = '2026, 10, 11, 0, 0';
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 9, 30, 0, 0')), [null, null, null, null], '09:30:00.000 is still today');
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 9, 30, 0, 1')), [M, '', '', ''], '09:30:00.001 is tomorrow');
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 13, 30, 0, 0')), [M, '', '', '']);
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 13, 30, 0, 1')), [M, M, '', '']);
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 17, 30, 0, 1')), [M, M, M, '']);
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 21, 30, 0, 0')), [M, M, M, '']);
+  assert.deepEqual(days(await rowAt(start, '2026, 10, 11, 21, 30, 0, 1')), [M, M, M, M]);
+  // A time not yet reached, or reached less than 30 minutes ago, is today
+  const r = await rowAt(start, '2026, 10, 11, 17, 0');
+  assert.deepEqual(days(r), [M, M, '', '']);
+  assert.deepEqual(temps(r), ['1209°', '1213°', '1117°', '1121°']);
+});
+
+test('weather edge cases: around midnight', async () => {
+  const start = '2026, 10, 11, 0, 0';
+  let r = await rowAt(start, '2026, 10, 11, 23, 59, 59, 999');
+  assert.deepEqual(days(r), [M, M, M, M]);
+  assert.deepEqual(temps(r), ['1209°', '1213°', '1217°', '1221°']);
+  r = await rowAt(start, '2026, 10, 12, 0, 0, 0, 0');
+  assert.deepEqual(days(r), [null, null, null, null], 'at midnight the same times become today');
+  assert.deepEqual(temps(r), ['1209°', '1213°', '1217°', '1221°'], 'and still show the same entries');
+  assert.equal(await evaluate(`document.getElementById('forecastRow').classList.contains('has-tomorrow')`), false);
+});
+
+test('weather edge cases: month and year change, leap day', async () => {
+  let r = await rowAt('2026, 11, 31, 0, 0', '2026, 11, 31, 14, 0');
+  assert.deepEqual(days(r), [M, M, '', '']);
+  assert.deepEqual(temps(r), ['109°', '113°', '3117°', '3121°'], '1 January 2027 for 09 and 13');
+  r = await rowAt('2026, 10, 30, 0, 0', '2026, 10, 30, 22, 0');
+  assert.deepEqual(temps(r), ['109°', '113°', '117°', '121°'], '30 November rolls to 1 December');
+  r = await rowAt('2028, 1, 28, 0, 0', '2028, 1, 28, 22, 0');
+  assert.deepEqual(temps(r), ['2909°', '2913°', '2917°', '2921°'], '28 February 2028 rolls to the leap day');
+  r = await rowAt('2027, 1, 28, 0, 0', '2027, 1, 28, 22, 0');
+  assert.deepEqual(temps(r), ['109°', '113°', '117°', '121°'], '28 February 2027 rolls to 1 March');
+});
+
+test('weather edge cases: summer-time changes in Stockholm', async () => {
+  await send('Emulation.setTimezoneOverride', { timezoneId: 'Europe/Stockholm' });
+  try {
+    // 25 October 2026: clocks go back at 03:00 (a 25-hour day)
+    let r = await rowAt('2026, 9, 24, 0, 0', '2026, 9, 24, 22, 0');
+    assert.deepEqual(days(r), [M, M, M, M]);
+    assert.deepEqual(temps(r), ['2509°', '2513°', '2517°', '2521°'], 'local hours on the day the clocks go back');
+    r = await rowAt('2026, 9, 25, 0, 0', '2026, 9, 25, 14, 0');
+    assert.deepEqual(temps(r), ['2609°', '2613°', '2517°', '2521°'], 'on the 25-hour day itself');
+    // 28 March 2027: clocks go forward at 02:00 (a 23-hour day)
+    r = await rowAt('2027, 2, 27, 0, 0', '2027, 2, 27, 22, 0');
+    assert.deepEqual(temps(r), ['2809°', '2813°', '2817°', '2821°'], 'local hours on the day the clocks go forward');
+    r = await rowAt('2027, 2, 28, 0, 0', '2027, 2, 28, 14, 0');
+    assert.deepEqual(temps(r), ['2909°', '2913°', '2817°', '2821°'], 'on the 23-hour day itself');
+    // The night of the change, before and after 03:00 / 02:00
+    assert.deepEqual(days(await rowAt('2026, 9, 24, 0, 0', '2026, 9, 25, 2, 30')), [null, null, null, null]);
+    assert.deepEqual(days(await rowAt('2027, 2, 27, 0, 0', '2027, 2, 28, 3, 30')), [null, null, null, null]);
+  } finally {
+    await send('Emulation.setTimezoneOverride', { timezoneId: '' });
+  }
+});
+
+test('weather edge cases: a forecast that does not reach a time shows a dash, not another hour', async () => {
+  // 12 entries from 14:00 reach 01:00; tomorrow's 09 and 13 are far beyond that
+  let r = await rowAt('2026, 10, 11, 14, 0', '2026, 10, 11, 14, 0', 12);
+  assert.deepEqual(r, [[M, '09', '', '–'], [M, '13', '', '–'], ['', '17', '☀️', '1117°'], ['', '21', '☀️', '1121°']]);
+  // Three-hour steps: 09 → 09:00, 13 → 12:00 (60 min away) and 17 → 18:00 are used
+  r = await rowAt('2026, 10, 11, 0, 0', '2026, 10, 11, 8, 0', 24, 3);
+  assert.deepEqual(temps(r), ['1109°', '1112°', '1118°', '1121°']);
+  // Exactly 90 minutes away is still used, one millisecond more is not
+  const only = (ms) => evaluate(`(() => {
+    const t = new Date(new Date(2026, 10, 11, 9, 0).getTime() + ${ms});
+    renderForecastRow([{ time: t.toISOString(), data: { air_temperature: 5, symbol_code: 1 } }], FORECAST_HOURS, new Date(2026, 10, 11, 8, 0));
+    return ${readRow};
+  })()`);
+  assert.equal((await only(-90 * MIN))[0][3], '5°', '07:30 for 09');
+  assert.equal((await only(90 * MIN))[0][3], '5°', '10:30 for 09');
+  assert.equal((await only(-90 * MIN - 1))[0][3], '–', '07:29:59.999 for 09');
+  assert.equal((await only(90 * MIN + 1))[0][3], '–', '10:30:00.001 for 09');
+  assert.deepEqual((await only(90 * MIN + 1)).map(x => x[2]), ['', '', '', ''], 'no icon next to a dash');
+});
+
+test('weather edge cases: the marking and its widths go away when no time is tomorrow', async () => {
+  const geometry = () => evaluate(`(() => {
+    const row = document.getElementById('forecastRow');
+    return { cls: row.classList.contains('has-tomorrow'), widths: [...row.querySelectorAll('.forecast-item')].map(e => Math.round(e.getBoundingClientRect().width)) };
+  })()`);
+  await rowAt('2026, 10, 11, 0, 0', '2026, 10, 11, 14, 0');
+  const marked = await geometry();
+  assert.equal(marked.cls, true);
+  await rowAt('2026, 10, 11, 0, 0', '2026, 10, 11, 8, 0');
+  const plain = await geometry();
+  assert.equal(plain.cls, false);
+  assert.ok(plain.widths.every(w => w < marked.widths[0]), `columns narrow again: ${plain.widths} vs ${marked.widths}`);
+});
+
+test('weather edge cases: the row is redrawn from the last forecast, and an error clears it', async () => {
+  await evaluate(`forecastSeries = ${seriesJs('2026, 10, 11, 0, 0')}`);
+  await evaluate(`renderForecastFromCache(new Date(2026, 10, 11, 23, 50))`);
+  assert.deepEqual(days(await evaluate(readRow)), [M, M, M, M]);
+  await evaluate(`renderForecastFromCache(new Date(2026, 10, 12, 0, 1))`);
+  assert.deepEqual(days(await evaluate(readRow)), [null, null, null, null], 'a new day without fetching again');
+  await evaluate(`renderForecastFromCache(new Date(2026, 10, 12, 9, 31))`);
+  assert.deepEqual(days(await evaluate(readRow)), [M, '', '', '']);
+  // A failed fetch empties the row and the cache, so the minute redraw cannot bring back old data
+  mocks.weather = () => ({ status: 500, body: '' });
+  await evaluate('loadWeather()');
+  assert.equal(await evaluate(`forecastSeries`), null);
+  await evaluate(`renderForecastFromCache(new Date(2026, 10, 12, 14, 0))`);
+  assert.equal(await evaluate(`document.getElementById('forecastRow').children.length`), 0);
+  assert.equal(await evaluate(`document.getElementById('forecastRow').classList.contains('has-tomorrow')`), false);
+  mocks.weather = DEFAULT_MOCKS.weather;
+  await evaluate('loadWeather()');
+  assert.ok(await evaluate(`Array.isArray(forecastSeries) && forecastSeries.length === 48`));
+});
+
+test('weather edge cases: the marked row fits and stays aligned in landscape and with a dash', async () => {
+  const check = () => evaluate(`(() => {
+    const items = [...document.querySelectorAll('#forecastRow .forecast-item')];
+    const card = document.querySelector('.weather-card').getBoundingClientRect();
+    const row = document.getElementById('forecastRow').getBoundingClientRect();
+    return {
+      fits: row.left >= card.left && row.right <= card.right,
+      time: new Set(items.map(e => Math.round(e.querySelector('.fc-time').getBoundingClientRect().top))).size,
+      temp: new Set(items.map(e => Math.round(e.querySelector('.fc-temp').getBoundingClientRect().top))).size,
+      overflow: items.some(e => e.querySelector('.fc-day').scrollWidth > e.getBoundingClientRect().width + 0.5),
+    };
+  })()`);
+  try {
+    for (const [w, h] of [[800, 1280], [1280, 800], [600, 960]]) {
+      await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: true });
+      await sleep(100);
+      await rowAt('2026, 10, 11, 14, 0', '2026, 10, 11, 14, 0', 12); // two dashes, two values
+      assert.deepEqual(await check(), { fits: true, time: 1, temp: 1, overflow: false }, `${w}×${h}`);
+    }
+  } finally {
+    await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: true });
+    await evaluate('loadWeather()');
+  }
+});
+
 test('weather: unknown symbol, rounding around zero', async () => {
   mocks.weather = () => ok(forecast({ air_temperature: -0.4, wind_speed: 0.4, symbol_code: 99 }));
   await evaluate('loadWeather()');

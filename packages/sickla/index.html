@@ -465,9 +465,20 @@
   .forecast-item .fc-time {
     opacity: 0.8;
   }
+  /* "i morgon" över klockslag som redan passerat i dag och därför visar morgondagen */
+  .forecast-item .fc-day {
+    font-size: 0.6rem;
+    line-height: 1;
+    min-height: 0.6rem;
+    white-space: nowrap;
+    color: #8fc7ff;
+  }
+  /* Med "i morgon" på raden får alla klockslag samma bredd, så avstånden blir jämna */
+  .forecast-row.has-tomorrow .forecast-item { width: 2.6rem; }
   .forecast-item .fc-icon {
     font-size: 1.1rem;
     line-height: 1;
+    min-height: 1em; /* tom ikon (saknad prognos) ska inte flytta upp temperaturen */
   }
   .forecast-item .fc-temp {
     font-weight: 600;
@@ -879,7 +890,7 @@ const FETCH_TIMEOUT_MS = 20 * 1000;
 // ---------- Version ----------
 // Höj vid varje release och håll i synk med version.json och CHANGELOG.md
 // (MAJOR.MINOR.PATCH). Git-taggen heter sickla-v<version>.
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.11.0';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 // Autoladda ny version: GitHub Pages publicerar direkt vid push, men en kiosk
@@ -1194,6 +1205,15 @@ const smhiSymbolIcon = {
   25: "🌨️", 26: "❄️", 27: "❄️"
 };
 
+// Klockslagen i prognosraden. Raden ritas om varje minut från senast hämtade
+// prognos, så att "i morgon" byts i rätt minut (09:31, midnatt) och inte först
+// vid nästa hämtning.
+const FORECAST_HOURS = [9, 13, 17, 21];
+// En prognospost längre bort än så från klockslaget visas inte (t.ex. om
+// SMHI:s svar inte räcker till morgondagens kväll).
+const FORECAST_MAX_GAP_MS = 90 * 60 * 1000;
+let forecastSeries = null;
+
 async function loadWeather() {
   try {
     // Hämtar upp till ca 2 dygn framåt så vi kan plocka ut kl 09/13/17/21
@@ -1212,23 +1232,28 @@ async function loadWeather() {
       `${smhiSymbolText[symbol] || "Okänt väder"}\nVind ${wind} m/s`;
 
     // Prognosrad för utvalda klockslag
-    renderForecastRow(series, [9, 13, 17, 21]);
+    forecastSeries = series;
+    renderForecastRow(series, FORECAST_HOURS);
   } catch (e) {
+    forecastSeries = null;
     document.getElementById('weatherDesc').textContent = 'Kunde inte hämta väder';
-    document.getElementById('forecastRow').innerHTML = '';
+    const row = document.getElementById('forecastRow');
+    row.innerHTML = '';
+    row.classList.remove('has-tomorrow');
   }
 }
 
-function renderForecastRow(series, hours) {
+function renderForecastRow(series, hours, nowDate = new Date()) {
   const row = document.getElementById('forecastRow');
-  const nowDate = new Date();
 
   const items = hours.map(h => {
     // Målet är kl h idag, lokal tid. Om klockslaget redan passerat, använd imorgon.
     const target = new Date(nowDate);
     target.setHours(h, 0, 0, 0);
+    let tomorrow = false;
     if (target.getTime() < nowDate.getTime() - 30 * 60 * 1000) {
       target.setDate(target.getDate() + 1);
+      tomorrow = true;
     }
 
     // Hitta den tidsserie-post som ligger närmast målet i tid
@@ -1244,22 +1269,32 @@ function renderForecastRow(series, hours) {
     }
     if (!closest) return null;
 
-    const temp = Math.round(closest.data.air_temperature);
+    const label = String(h).padStart(2, '0');
+    if (closestDiff > FORECAST_MAX_GAP_MS) return { label, temp: '–', icon: '', tomorrow };
+    const temp = `${Math.round(closest.data.air_temperature)}°`;
     const symbol = closest.data.symbol_code;
     const icon = smhiSymbolIcon[symbol] || '🌡️';
-    const label = String(h).padStart(2, '0');
-    return { label, temp, icon };
+    return { label, temp, icon, tomorrow };
   }).filter(Boolean);
 
+  // Raden med "i morgon" finns bara när minst ett klockslag gäller i morgon;
+  // klockslagen i dag får då en tom rad så att alla står i linje.
+  const anyTomorrow = items.some(i => i.tomorrow);
+  row.classList.toggle('has-tomorrow', anyTomorrow);
   row.innerHTML = items.map(i => `
-    <div class="forecast-item">
+    <div class="forecast-item${i.tomorrow ? ' tomorrow' : ''}">
+      ${anyTomorrow ? `<span class="fc-day">${i.tomorrow ? 'i morgon' : ''}</span>` : ''}
       <span class="fc-time">${i.label}</span>
       <span class="fc-icon">${i.icon}</span>
-      <span class="fc-temp">${i.temp}°</span>
+      <span class="fc-temp">${i.temp}</span>
     </div>
   `).join('');
 }
+function renderForecastFromCache(now = new Date()) {
+  if (forecastSeries) renderForecastRow(forecastSeries, FORECAST_HOURS, now);
+}
 loadWeather();
+setInterval(renderForecastFromCache, 60 * 1000);
 setInterval(loadWeather, 30 * 60 * 1000); // SMHI räknar om prognosen ca var 4:e timme, 30 min räcker gott
 
 // ---------- Nederbörd närmaste 2 h (MET Norway nowcast, radarbaserad, ingen nyckel) ----------
